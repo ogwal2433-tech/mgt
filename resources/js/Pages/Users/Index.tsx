@@ -8,6 +8,7 @@ import { Field, PasswordInput, SelectInput, TextInput } from '@/Components/ui/Fo
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toastSuccess, confirmAction } from '@/lib/notify';
+import { formatDateTime } from '@/types/app';
 
 export default function UsersIndex({ users, roles, employees, filters }: any) {
     const { flash } = usePage().props as any;
@@ -48,6 +49,20 @@ export default function UsersIndex({ users, roles, employees, filters }: any) {
             key: 'is_active',
             header: 'Status',
             render: (row) => <Badge color={row.is_active ? 'green' : 'red'}>{row.is_active ? 'Active' : 'Deactivated'}</Badge>,
+        },
+        {
+            key: 'last_login_at',
+            header: 'Login Status',
+            render: (row) => (
+                row.last_login_at ? (
+                    <span className="text-xs">
+                        <Badge color="green">Signed in</Badge>
+                        <span className="ms-1 text-ink-500">{formatDateTime(row.last_login_at)}</span>
+                    </span>
+                ) : (
+                    <Badge color="gray">Never signed in</Badge>
+                )
+            ),
         },
         {
             key: 'actions',
