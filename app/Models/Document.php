@@ -23,6 +23,14 @@ class Document extends Model
         ];
     }
 
+    /**
+     * Documents are addressed by their public uuid, not the sequential id.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
+
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_user_id');
