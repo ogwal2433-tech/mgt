@@ -67,6 +67,14 @@ class User extends Authenticatable
         return $this->hasMany(LoginHistory::class);
     }
 
+    /**
+     * Send the queued password-reset notification (never blocks the request).
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
+    }
+
     public function employeeContract(): HasOne
     {
         return $this->hasOne(EmployeeContract::class, 'employee_id', 'employee_id');
