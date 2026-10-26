@@ -26,7 +26,7 @@ class DocumentSubmissionController extends Controller
         $user = $request->user();
         $canReview = $user->hasPermission(Permissions::DOCS_REVIEW);
 
-        $query = DocumentSubmission::with(['employee:id,employee_code,first_name,last_name', 'user:id,username', 'reviewer:id,username', 'files.document']);
+        $query = DocumentSubmission::with(['employee:id,employee_code,first_name,last_name', 'user:id,username', 'reviewer:id,username', 'recipient:id,name', 'files.document']);
 
         if (! $canReview) {
             $query->where('user_id', $user->id);
@@ -48,10 +48,28 @@ class DocumentSubmissionController extends Controller
             'submissions' => $submissions,
             'filters' => $request->only(['search', 'status']),
             'canReview' => $canReview,
+            'recipients' => $this->recipientOptions(),
             'pendingCount' => $canReview
                 ? DocumentSubmission::where('status', 'submitted')->count()
                 : DocumentSubmission::where('user_id', $user->id)->where('status', 'submitted')->count(),
         ]);
+    }
+
+    /**
+     * People a document can be addressed to (HR, MD, Lead, ...), with names.
+     */
+    private function recipientOptions()
+    {
+        return \App\Models\User::active()
+            ->with('roles:id,name,slug')
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($u) => [
+                'id' => $u->id,
+                'name' => $u->displayName(),
+                'role' => $u->roles->pluck('name')->implode(', ') ?: 'Staff',
+            ])
+            ->values();
     }
 
     public function store(Request $request)
@@ -61,9 +79,12 @@ class DocumentSubmissionController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'category' => ['required', Rule::in(['general', 'certificate', 'identification', 'claim', 'contract', 'leave', 'other'])],
+            'recipient_id' => ['required', 'integer', Rule::exists('users', 'id')],
             'notes' => ['nullable', 'string', 'max:4000'],
             'files' => ['nullable', 'array'],
             'files.*' => ['file', 'max:20480', 'mimes:pdf,doc,docx,xls,xlsx,csv,png,jpg,jpeg,txt,zip,ppt,pptx,odt,rtf'],
+        ], [
+            'recipient_id.required' => 'Please choose who this document is going to.',
         ]);
 
         $submission = DB::transaction(function () use ($request, $data, $user) {
@@ -71,6 +92,7 @@ class DocumentSubmissionController extends Controller
                 'reference_number' => Sequence::next('document_submission', 'DOC', 4),
                 'user_id' => $user->id,
                 'employee_id' => $user->employee_id,
+                'recipient_id' => $data['recipient_id'],
                 'title' => $data['title'],
                 'category' => $data['category'],
                 'notes' => $data['notes'] ?? null,
@@ -91,20 +113,21 @@ class DocumentSubmissionController extends Controller
             }
 
             AuditLogger::log('document_submission.created', DocumentSubmission::class, $submission->id,
-                "Submitted documents to HR: {$submission->title}");
+                "Submitted documents for review: {$submission->title}");
 
             return $submission;
         });
 
-        // Tell HR there is something to review.
-        foreach ($this->reviewers() as $reviewer) {
-            NotificationService::notify($reviewer, 'document_submission.submitted',
+        // The document goes to the intended person's account.
+        $recipient = \App\Models\User::find($data['recipient_id']);
+        if ($recipient) {
+            NotificationService::notify($recipient, 'document_submission.submitted',
                 'New document submission',
-                "{$user->displayName()} submitted \"{$submission->title}\" ({$submission->reference_number}) for review.",
+                "{$user->displayName()} sent \"{$submission->title}\" ({$submission->reference_number}) to you for review.",
                 '/documents-submissions', ['submission_id' => $submission->id]);
         }
 
-        return back()->with('success', "Documents submitted to HR ({$submission->reference_number}). You can follow the status here.");
+        return back()->with('success', "Documents sent to " . ($recipient?->displayName() ?? 'the reviewer') . " ({$submission->reference_number}). You can follow the status here.");
     }
 
     /**
@@ -125,7 +148,7 @@ class DocumentSubmissionController extends Controller
             abort(403, 'You can only view your own submissions.');
         }
 
-        $document_submission->load(['employee:id,employee_code,first_name,last_name', 'user:id,username', 'reviewer:id,username', 'files.document']);
+        $document_submission->load(['employee:id,employee_code,first_name,last_name', 'user:id,username', 'reviewer:id,username', 'recipient:id,name', 'files.document']);
 
         return Inertia::render('Documents/Show', [
             'submission' => $document_submission,

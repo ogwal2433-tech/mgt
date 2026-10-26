@@ -9,16 +9,17 @@ import { formatDate, formatDateTime } from '@/types/app';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function DocumentSubmissionsIndex({ submissions, filters, canReview, pendingCount }: any) {
-    const { flash } = usePage().props as any;
-    const [search, setSearch] = useState(filters?.search ?? '');
-    const [showCreate, setShowCreate] = useState(false);
-    const createForm = useForm({
-        title: '',
-        category: 'general',
-        notes: '',
-        files: [] as File[],
-    });
+export default function DocumentSubmissionsIndex({ submissions, filters, canReview, pendingCount, recipients }: any) {
+const { flash } = usePage().props as any;
+const [search, setSearch] = useState(filters?.search ?? '');
+const [showCreate, setShowCreate] = useState(false);
+const createForm = useForm({
+title: '',
+category: 'general',
+recipient_id: '',
+notes: '',
+files: [] as File[],
+});
 
     const statusLabel: Record<string, string> = {
         submitted: 'Pending review',
@@ -38,6 +39,7 @@ export default function DocumentSubmissionsIndex({ submissions, filters, canRevi
         },
         { key: 'title', header: 'Title', render: (row) => <span className="font-medium text-ink-900">{row.title}</span> },
         { key: 'category', header: 'Category', render: (row) => <span className="capitalize">{row.category}</span> },
+{ key: 'recipient', header: 'To', render: (row: any) => row.recipient?.name ?? <span className="text-ink-500">HR (default)</span> },
         ...(canReview ? [{ key: 'employee', header: 'Submitted by', render: (row: any) => row.employee?.full_name ?? row.user?.username ?? '—' } as Column<any>] : []),
         {
             key: 'files',
@@ -115,7 +117,7 @@ export default function DocumentSubmissionsIndex({ submissions, filters, canRevi
             <Modal
                 open={showCreate}
                 onClose={() => setShowCreate(false)}
-                title="Submit documents to HR"
+                title="Submit documents"
                 size="lg"
                 footer={
                     <>
@@ -126,6 +128,7 @@ export default function DocumentSubmissionsIndex({ submissions, filters, canRevi
                                 const fd = new FormData();
                                 fd.append('title', createForm.data.title);
                                 fd.append('category', createForm.data.category);
+            fd.append('recipient_id', createForm.data.recipient_id);
                                 if (createForm.data.notes) fd.append('notes', createForm.data.notes);
                                 createForm.data.files.forEach((file) => fd.append('files[]', file));
                                 createForm.post('/documents-submissions', {
@@ -135,7 +138,7 @@ export default function DocumentSubmissionsIndex({ submissions, filters, canRevi
                                 } as any);
                             }}
                         >
-                            Submit to HR
+                            Send document
                         </Button>
                     </>
                 }
@@ -158,7 +161,15 @@ export default function DocumentSubmissionsIndex({ submissions, filters, canRevi
                             onChange={(e) => createForm.setData('title', e.target.value)}
                         />
                     </Field>
-                    <Field label="Category" required>
+                    <Field label="Send to (intended reviewer)" required error={createForm.errors.recipient_id}>
+                <SelectInput value={createForm.data.recipient_id} onChange={(e) => createForm.setData('recipient_id', e.target.value)}>
+                    <option value="">Select who this document is going to...</option>
+                    {(recipients ?? []).map((r: any) => (
+                        <option key={r.id} value={r.id}>{r.name} ({r.role})</option>
+                    ))}
+                </SelectInput>
+            </Field>
+            <Field label="Category" required>
                         <SelectInput value={createForm.data.category} onChange={(e) => createForm.setData('category', e.target.value)}>
                             {[
                                 ['general', 'General document'],

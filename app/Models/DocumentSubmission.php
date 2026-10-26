@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class DocumentSubmission extends Model
 {
     protected $fillable = [
-        'reference_number', 'user_id', 'employee_id', 'title', 'category',
+        'reference_number', 'user_id', 'employee_id', 'recipient_id', 'title', 'category',
         'notes', 'status', 'reviewed_by', 'reviewed_at', 'review_comments',
     ];
 
@@ -28,6 +28,14 @@ class DocumentSubmission extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    /**
+     * The person the submission is addressed to (HR, MD, Lead, ...).
+     */
+    public function recipient(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recipient_id');
     }
 
     public function reviewer(): BelongsTo

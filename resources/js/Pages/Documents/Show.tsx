@@ -39,8 +39,9 @@ export default function DocumentSubmissionShow({ submission: s, canReview }: any
 
             <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
                 <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <Badge color={statusColor(s.status)}>{statusLabel[s.status] ?? s.status}</Badge>
-                    <span className="text-ink-500">Submitted {formatDateTime(s.created_at)}</span>
+                <Badge color={statusColor(s.status)}>{statusLabel[s.status] ?? s.status}</Badge>
+                <span className="text-ink-500">Submitted {formatDateTime(s.created_at)}</span>
+                <span className="font-semibold text-ink-800">To: {s.recipient?.name ?? 'HR (default)'}</span>
                     {s.reviewed_at && (
                         <span className="font-semibold text-ink-800">
                             {s.status} by {s.reviewer?.username ?? 'HR'} · {formatDateTime(s.reviewed_at)}
