@@ -55,8 +55,33 @@ files: [] as File[],
                 </Badge>
             ),
         },
-        { key: 'created_at', header: 'Submitted', render: (row) => formatDate(row.created_at) },
-    ];
+{ key: 'created_at', header: 'Submitted', render: (row) => formatDate(row.created_at) },
+{
+    key: 'actions',
+    header: 'Actions',
+    render: (row) => (
+        <div className="flex flex-wrap items-center gap-2">
+            <Link
+                href={`/documents-submissions/${row.id}`}
+                className="rounded-md border border-gray-300 bg-white px-2.5 py-1 text-xs font-semibold text-ink-700 transition-colors hover:border-brand-500 hover:text-brand-700"
+            >
+                View
+            </Link>
+            {canReview && row.status === 'submitted' && (
+                <Link
+                    href={`/documents-submissions/${row.id}`}
+                    className="rounded-md border border-green-600 bg-green-600 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-green-700"
+                >
+                    Review
+                </Link>
+            )}
+            {row.status === 'accepted' && (
+                <span className="rounded-md bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700">Done</span>
+            )}
+        </div>
+    ),
+},
+];
 
     return (
         <AppLayout
