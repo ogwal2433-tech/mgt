@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
+    }
+
+    body {
+        @apply bg-gray-50 text-ink-900;
+        font-family: theme('fontFamily.sans');
+        font-size: 0.875rem;
+        line-height: 1.5rem;
+        letter-spacing: -0.006em;
+        font-variant-ligatures: common-ligatures contextual;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-display font-bold text-ink-900;
+        letter-spacing: -0.022em;
+        line-height: 1.18;
+        text-wrap: balance;
+        font-variant-numeric: tabular-nums;
+    }
+
+    h1 { @apply text-3xl; }
+    h2 { @apply text-2xl; }
+    h3 { @apply text-xl; }
+    h4 { @apply text-lg; }
+
+    p { text-wrap: pretty; }
+
+    /* Numbers align in columns — tables, stats, money */
+    table, .tabular {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: 'tnum';
+    }
+
+    label {
+        @apply text-ink-700;
+        letter-spacing: -0.004em;
+    }
+
+    input, select, textarea, button {
+        font-family: inherit;
+        letter-spacing: inherit;
+    }
+
+    ::selection {
+        @apply bg-brand-100 text-brand-900;
+    }
+
+    ::placeholder {
+        @apply text-ink-400;
+        opacity: 1;
+    }
+
+    /* Cleaner focus ring */
+    :focus-visible {
+        outline: 2px solid theme('colors.brand.600');
+        outline-offset: 2px;
+    }
+}
+
+@layer components {
+    /* Uppercase micro-label used across cards and stats */
+    .eyebrow {
+        @apply text-2xs font-semibold uppercase tracking-wider text-ink-500;
+    }
+
+    .display-title {
+        @apply font-display font-extrabold tracking-tight text-ink-900;
+    }
+
+    .prose-lead {
+        @apply text-base text-ink-600;
+        line-height: 1.7;
+    }
+
+    .link-clean {
+        @apply font-semibold text-brand-700 transition-colors hover:text-brand-800;
+        text-underline-offset: 3px;
+        text-decoration-thickness: 1px;
+    }
+
+    .numeric {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: 'tnum';
+    }
+}
+
+@layer utilities {
+    .text-balance { text-wrap: balance; }
+    .text-pretty { text-wrap: pretty; }
+}
