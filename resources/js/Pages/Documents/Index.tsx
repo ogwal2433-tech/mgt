@@ -10,7 +10,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function DocumentSubmissionsIndex({ submissions, filters, canReview, pendingCount, recipients }: any) {
-const { flash } = usePage().props as any;
+const { flash, auth } = usePage().props as any;
 const [search, setSearch] = useState(filters?.search ?? '');
 const [showCreate, setShowCreate] = useState(false);
 const createForm = useForm({
@@ -67,7 +67,7 @@ files: [] as File[],
             >
                 View
             </Link>
-            {canReview && row.status === 'submitted' && (
+            {(canReview || row.recipient?.id === (auth as any)?.user?.id) && row.status === 'submitted' && (
                 <Link
                     href={`/documents-submissions/${row.id}`}
                     className="rounded-md border border-green-600 bg-green-600 px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-green-700"

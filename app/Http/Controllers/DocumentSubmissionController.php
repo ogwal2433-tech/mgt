@@ -29,7 +29,9 @@ class DocumentSubmissionController extends Controller
         $query = DocumentSubmission::with(['employee:id,employee_code,first_name,last_name', 'user:id,username', 'reviewer:id,username', 'recipient:id,name', 'files.document']);
 
         if (! $canReview) {
-            $query->where('user_id', $user->id);
+            $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)->orWhere('recipient_id', $user->id);
+            });
         }
 
         if ($search = $request->string('search')->toString()) {
@@ -144,7 +146,9 @@ class DocumentSubmissionController extends Controller
     {
         $user = request()->user();
 
-        if (! $user->hasPermission(Permissions::DOCS_REVIEW) && $document_submission->user_id !== $user->id) {
+        if (! $user->hasPermission(Permissions::DOCS_REVIEW)
+            && $document_submission->user_id !== $user->id
+            && $document_submission->recipient_id !== $user->id) {
             abort(403, 'You can only view your own submissions.');
         }
 
@@ -152,13 +156,15 @@ class DocumentSubmissionController extends Controller
 
         return Inertia::render('Documents/Show', [
             'submission' => $document_submission,
-            'canReview' => $user->hasPermission(Permissions::DOCS_REVIEW),
+            'canReview' => $user->hasPermission(Permissions::DOCS_REVIEW) || $document_submission->recipient_id === $user->id,
         ]);
     }
 
     public function review(Request $request, DocumentSubmission $document_submission)
     {
-        if (! $request->user()->hasPermission(Permissions::DOCS_REVIEW)) {
+        $actor = $request->user();
+        if (! $actor->hasPermission(Permissions::DOCS_REVIEW)
+            && $document_submission->recipient_id !== $actor->id) {
             abort(403);
         }
 

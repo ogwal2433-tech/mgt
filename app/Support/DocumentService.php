@@ -154,6 +154,14 @@ final class DocumentService
             return true;
         }
 
+        // The person a submission was addressed to can view/download its files.
+        if (str_ends_with((string) $document->linked_type, 'DocumentSubmission')) {
+            $submission = \App\Models\DocumentSubmission::find($document->linked_id);
+            if ($submission && $submission->recipient_id === $user->id) {
+                return true;
+            }
+        }
+
         if ($document->is_confidential && ! $user->hasPermission(Permissions::DOCUMENTS_DOWNLOAD_CONFIDENTIAL)) {
             return false;
         }

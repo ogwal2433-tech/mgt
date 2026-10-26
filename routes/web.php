@@ -166,7 +166,7 @@ Route::middleware(['auth', 'active'])->group(function () {
         ->middleware('permission:docs.submit,docs.review')
         ->name('document-submissions.show');
     Route::post('/documents-submissions/{document_submission}/review', [\App\Http\Controllers\DocumentSubmissionController::class, 'review'])
-        ->middleware('permission:docs.review')
+        ->middleware('auth')
         ->name('document-submissions.review');
 
     // Finance reports (cashbook, aging, summary)
