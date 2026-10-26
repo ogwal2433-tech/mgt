@@ -118,6 +118,7 @@ class HandleInertiaRequests extends \Inertia\Middleware
             ['label' => 'Client Invoicing', 'href' => '/invoices', 'icon' => 'send', 'show' => $any([P::INVOICES_VIEW, P::INVOICES_MANAGE])],
             ['label' => 'Payroll', 'href' => '/payroll', 'icon' => 'cash', 'show' => $any([P::PAYROLL_VIEW, P::PAYROLL_RUN])],
             ['label' => 'My Payslips', 'href' => '/my-payslips', 'icon' => 'receipt', 'show' => true],
+            ['label' => 'Document Submissions', 'href' => '/documents-submissions', 'icon' => 'file-text', 'show' => $any([P::DOCS_SUBMIT, P::DOCS_REVIEW])],
             ['label' => 'Disbursements', 'href' => '/disbursements', 'icon' => 'cash', 'show' => $any([P::FINANCE_DISBURSE, P::FINANCE_VIEW]), 'badge' => $disbursementCount],
             ['label' => 'Payment Receipts', 'href' => '/receipts', 'icon' => 'receipt', 'show' => $any([P::FINANCE_VIEW, P::FINANCE_DISBURSE, P::REQUISITIONS_CREATE])],
             ['label' => 'Accountability', 'href' => '/accountability', 'icon' => 'clipboard-check', 'show' => $any([P::FINANCE_ACCOUNTABILITY_REVIEW, P::REQUISITIONS_CREATE, P::FINANCE_VIEW])],

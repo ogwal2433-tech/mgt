@@ -48,7 +48,15 @@ export default function Login({ status }: { status?: string; canResetPassword: b
                     />
                 </Field>
 
-                <Field label="Password" htmlFor="password" error={errors.password} required>
+                <div>
+                    <div className="mb-1.5 flex items-center justify-between">
+                        <label htmlFor="password" className="text-sm font-semibold text-ink-700">
+                            Password <span className="text-red-600">*</span>
+                        </label>
+                        <a href="/forgot-password" className="text-xs font-semibold text-brand-700 transition-colors hover:text-brand-800 hover:underline">
+                            Forgot password?
+                        </a>
+                    </div>
                     <PasswordInput
                         id="password"
                         name="password"
@@ -57,17 +65,13 @@ export default function Login({ status }: { status?: string; canResetPassword: b
                         placeholder="••••••••"
                         onChange={(e) => setData('password', e.target.value)}
                     />
-                </Field>
-
-                <div className="flex items-center justify-between">
-                    <label className="flex cursor-pointer items-center gap-2.5">
-                        <Checkbox name="remember" checked={data.remember} onChange={(e) => setData('remember', (e.target.checked || false) as false)} />
-                        <span className="text-sm text-ink-600">Keep me signed in</span>
-                    </label>
-                    <a href="/forgot-password" className="text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800">
-                        Forgot password?
-                    </a>
+                    {errors.password && <p className="mt-1.5 text-xs font-medium text-red-600">{errors.password}</p>}
                 </div>
+
+                <label className="flex cursor-pointer items-center gap-2.5">
+                    <Checkbox name="remember" checked={data.remember} onChange={(e) => setData('remember', (e.target.checked || false) as false)} />
+                    <span className="text-sm text-ink-600">Keep me signed in</span>
+                </label>
 
                 <Button type="submit" loading={processing} className="w-full" size="lg">
                     {processing ? 'Signing in…' : 'Sign in'}

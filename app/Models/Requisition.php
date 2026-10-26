@@ -14,7 +14,7 @@ class Requisition extends Model
         'category_id', 'project_id', 'title', 'purpose', 'justification', 'currency',
         'requested_amount', 'approved_amount', 'amount_paid', 'amount_accounted',
         'amount_refunded', 'priority', 'required_date', 'status', 'current_stage',
-        'approval_chain', 'supplier_name', 'supplier_contact', 'budget_reference', 'is_advance',
+        'approval_chain', 'supplier_name', 'supplier_contact', 'destination', 'trip_start', 'trip_end', 'transport_mode', 'budget_reference', 'is_advance',
         'accountability_required', 'submitted_at', 'closed_at', 'created_by',
     ];
 
@@ -31,6 +31,8 @@ class Requisition extends Model
             'is_advance' => 'boolean',
             'accountability_required' => 'boolean',
             'required_date' => 'date',
+            'trip_start' => 'date',
+            'trip_end' => 'date',
             'submitted_at' => 'datetime',
             'closed_at' => 'datetime',
         ];

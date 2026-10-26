@@ -70,6 +70,10 @@ final class Permissions
     public const INVOICES_MANAGE = 'invoices.manage';
     public const INVOICES_PAYMENTS = 'invoices.payments';
 
+    // Employee document submissions
+    public const DOCS_SUBMIT = 'docs.submit';
+    public const DOCS_REVIEW = 'docs.review';
+
     // Platform
     public const AUDIT_VIEW = 'audit.view';
     public const SYSTEM_SETTINGS = 'system.settings';
@@ -132,6 +136,9 @@ final class Permissions
             self::INVOICES_VIEW => ['View invoices', 'View client invoices and receipts'],
             self::INVOICES_MANAGE => ['Manage invoices', 'Create and manage client invoices'],
             self::INVOICES_PAYMENTS => ['Record invoice payments', 'Record client payments against invoices'],
+
+            self::DOCS_SUBMIT => ['Submit documents', 'Submit documents to HR and follow their status'],
+            self::DOCS_REVIEW => ['Review document submissions', 'Accept or reject employee document submissions'],
 
             self::AUDIT_VIEW => ['Audit logs', 'Read the audit trail'],
             self::SYSTEM_SETTINGS => ['System settings', 'Application configuration'],

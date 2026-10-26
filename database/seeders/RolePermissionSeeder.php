@@ -27,6 +27,7 @@ class RolePermissionSeeder extends Seeder
                     P::EXTERNAL_REQUISITIONS_VIEW, P::EXTERNAL_REQUISITIONS_MANAGE, P::FINANCE_VIEW, P::PROJECTS_VIEW,
                     P::PAYROLL_VIEW, P::PAYROLL_APPROVE, P::INVOICES_VIEW,
                     P::REPORTS_EXECUTIVE, P::REPORTS_FINANCIAL, P::REPORTS_HR, P::REPORTS_TECHNICAL,
+                    P::DOCS_SUBMIT,
                     P::AUDIT_VIEW, P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
                 ],
             ],
@@ -43,6 +44,7 @@ class RolePermissionSeeder extends Seeder
                     P::INVOICES_VIEW, P::INVOICES_MANAGE, P::INVOICES_PAYMENTS,
                     P::PROJECTS_VIEW, P::PROCUREMENT_MANAGE, P::INVENTORY_MANAGE, P::ASSETS_MANAGE,
                     P::REPORTS_EXECUTIVE, P::REPORTS_FINANCIAL, P::REPORTS_HR,
+                    P::DOCS_SUBMIT, P::DOCS_REVIEW,
                     P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
                 ],
             ],
@@ -53,6 +55,7 @@ class RolePermissionSeeder extends Seeder
                     P::FINANCE_ACCOUNTABILITY_REVIEW, P::FINANCE_REFUNDS, P::FINANCE_BUDGETS,
                     P::PAYROLL_VIEW, P::PAYROLL_RUN, P::PAYROLL_PAY,
                     P::INVOICES_VIEW, P::INVOICES_PAYMENTS,
+                    P::DOCS_SUBMIT,
                     P::REPORTS_FINANCIAL, P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
                 ],
             ],
@@ -64,6 +67,7 @@ class RolePermissionSeeder extends Seeder
                     P::EXTERNAL_REQUISITIONS_MANAGE, P::EXTERNAL_REQUISITIONS_VIEW,
                     P::PROJECTS_MANAGE, P::PROJECTS_VIEW, P::TASKS_UPDATE, P::SUPPORT_TICKETS,
                     P::REPORTS_TECHNICAL,
+                    P::DOCS_SUBMIT,
                 ],
             ],
             'technical_staff' => [
@@ -71,6 +75,7 @@ class RolePermissionSeeder extends Seeder
                 'permissions' => [
                     P::PROJECTS_VIEW, P::TASKS_UPDATE, P::SUPPORT_TICKETS,
                     P::REQUISITIONS_CREATE,
+                    P::DOCS_SUBMIT,
                 ],
             ],
             'system_admin' => [
@@ -78,6 +83,7 @@ class RolePermissionSeeder extends Seeder
                 'description' => 'System configuration only. No financial or HR approval authority is granted by default.',
                 'permissions' => [
                     P::AUDIT_VIEW, P::SYSTEM_SETTINGS, P::SYSTEM_USERS, P::SYSTEM_ROLES,
+                    P::DOCS_SUBMIT,
                 ],
             ],
         ];

@@ -155,6 +155,20 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/invoices/{invoice}/clear', [\App\Http\Controllers\InvoiceController::class, 'clear'])->middleware('permission:invoices.payments')->name('invoices.clear');
     Route::get('/invoices/{invoice}/pdf', [\App\Http\Controllers\InvoiceController::class, 'pdf'])->middleware(['signed', 'permission:invoices.view'])->name('invoices.pdf');
 
+    // Employee document submissions
+    Route::get('/documents-submissions', [\App\Http\Controllers\DocumentSubmissionController::class, 'index'])
+        ->middleware('permission:docs.submit,docs.review')
+        ->name('document-submissions.index');
+    Route::post('/documents-submissions', [\App\Http\Controllers\DocumentSubmissionController::class, 'store'])
+        ->middleware('permission:docs.submit')
+        ->name('document-submissions.store');
+    Route::get('/documents-submissions/{document_submission}', [\App\Http\Controllers\DocumentSubmissionController::class, 'show'])
+        ->middleware('permission:docs.submit,docs.review')
+        ->name('document-submissions.show');
+    Route::post('/documents-submissions/{document_submission}/review', [\App\Http\Controllers\DocumentSubmissionController::class, 'review'])
+        ->middleware('permission:docs.review')
+        ->name('document-submissions.review');
+
     // Finance reports (cashbook, aging, summary)
     Route::get('/reports/finance', [\App\Http\Controllers\FinanceReportController::class, 'index'])
         ->middleware('permission:reports.financial,finance.view')

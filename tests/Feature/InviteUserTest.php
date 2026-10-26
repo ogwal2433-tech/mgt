@@ -327,3 +327,59 @@ it('sends the forgot-password email from the login page flow', function () {
 
     Notification::assertSentTo($staff, \App\Notifications\ResetPasswordNotification::class);
 });
+
+it('lets any employee submit documents to hr and see the status', function () {
+    $staff = makeUser('technical_staff');
+    $hr = makeUser('hr');
+
+    // Any employee can submit.
+    $this->actingAs($staff)->post('/documents-submissions', [
+        'title' => 'Academic certificates',
+        'category' => 'certificate',
+        'notes' => 'Please verify my degree certificates',
+    ])->assertSessionHas('success');
+
+    $submission = \App\Models\DocumentSubmission::first();
+    expect($submission->status)->toBe('submitted');
+    expect($submission->reference_number)->toStartWith('DOC-');
+    expect($submission->user_id)->toBe($staff->id);
+
+    // The employee sees their submission and its status.
+    $this->actingAs($staff)->get('/documents-submissions')->assertOk();
+    $this->actingAs($staff)->get("/documents-submissions/{$submission->id}")->assertOk();
+
+    // Other employees cannot see it.
+    $other = makeUser('technical_staff');
+    $this->actingAs($other)->get("/documents-submissions/{$submission->id}")->assertForbidden();
+
+    // HR rejects with a reason — the employee sees the status and comments.
+    $this->actingAs($hr)->post("/documents-submissions/{$submission->id}/review", [
+        'decision' => 'rejected',
+        'review_comments' => 'Certificates are not certified copies',
+    ])->assertSessionHas('success');
+
+    $submission->refresh();
+    expect($submission->status)->toBe('rejected');
+    expect($submission->review_comments)->toBe('Certificates are not certified copies');
+    expect($submission->reviewed_by)->toBe($hr->id);
+
+    // HR acceptance path too.
+    $this->actingAs($staff)->post('/documents-submissions', ['title' => 'Second batch', 'category' => 'general']);
+    $second = \App\Models\DocumentSubmission::orderByDesc('id')->first();
+
+    $this->actingAs($hr)->post("/documents-submissions/{$second->id}/review", [
+        'decision' => 'accepted',
+        'review_comments' => 'All good',
+    ])->assertSessionHas('success');
+    expect($second->fresh()->status)->toBe('accepted');
+});
+
+it('blocks non-hr users from reviewing document submissions', function () {
+    $staff = makeUser('technical_staff');
+    $this->actingAs($staff)->post('/documents-submissions', ['title' => 'Doc', 'category' => 'general']);
+    $submission = \App\Models\DocumentSubmission::first();
+
+    $this->actingAs($staff)->post("/documents-submissions/{$submission->id}/review", [
+        'decision' => 'accepted',
+    ])->assertForbidden();
+});
