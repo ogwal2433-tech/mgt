@@ -40,11 +40,10 @@ class RequisitionWorkflowService
     {
         $requester = $requisition->requester ?? User::find($requisition->requester_user_id);
 
-        $base = match (true) {
-            $requester?->isManagingDirector() => [ApprovalStage::Hr],
-            $requester?->isHr() => [ApprovalStage::Hr, ApprovalStage::Md],
-            default => [ApprovalStage::TechnicalLead, ApprovalStage::Hr, ApprovalStage::Md],
-        };
+        // Internal requisitions always follow Technical Lead -> HR -> MD.
+        // Stages the requester personally holds are removed below (no self-approval):
+        // an HR requester therefore goes TL -> MD, never straight to MD.
+        $base = [ApprovalStage::TechnicalLead, ApprovalStage::Hr, ApprovalStage::Md];
 
         $permissionFor = fn (ApprovalStage $stage) => match ($stage) {
             ApprovalStage::TechnicalLead => Permissions::REQUISITIONS_REVIEW_TECHNICAL,

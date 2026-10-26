@@ -92,7 +92,7 @@ class ContractController extends Controller
                 'renewal_date' => $data['renewal_date'] ?? null,
                 'status' => $data['status'],
                 'salary' => $data['salary'] ?? null,
-                'currency' => $data['currency'] ?? 'USD',
+                'currency' => $data['currency'] ?? 'UGX',
                 'working_hours' => $data['working_hours'] ?? null,
                 'signature_status' => $data['signature_status'] ?? 'pending',
                 'current_version' => 1,

@@ -55,8 +55,8 @@ class RolePermissionSeeder extends Seeder
                     P::FINANCE_ACCOUNTABILITY_REVIEW, P::FINANCE_REFUNDS, P::FINANCE_BUDGETS,
                     P::PAYROLL_VIEW, P::PAYROLL_RUN, P::PAYROLL_PAY,
                     P::INVOICES_VIEW, P::INVOICES_PAYMENTS,
-                    P::DOCS_SUBMIT,
-                    P::REPORTS_FINANCIAL, P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
+        P::DOCS_SUBMIT, P::DOCS_REVIEW,
+        P::REPORTS_FINANCIAL, P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
                 ],
             ],
             'technical_lead' => [
@@ -82,8 +82,8 @@ class RolePermissionSeeder extends Seeder
                 'name' => 'System Administrator',
                 'description' => 'System configuration only. No financial or HR approval authority is granted by default.',
                 'permissions' => [
-                    P::AUDIT_VIEW, P::SYSTEM_SETTINGS, P::SYSTEM_USERS, P::SYSTEM_ROLES,
-                    P::DOCS_SUBMIT,
+        P::AUDIT_VIEW, P::SYSTEM_SETTINGS, P::SYSTEM_USERS, P::SYSTEM_ROLES,
+        P::DOCS_SUBMIT, P::DOCS_REVIEW,
                 ],
             ],
         ];

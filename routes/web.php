@@ -199,8 +199,8 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->middleware('permission:system.settings')->name('settings.index');
     Route::put('/settings', [SettingsController::class, 'update'])->middleware('permission:system.settings')->name('settings.update');
 
-    // Documents (private downloads)
-    Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->middleware('signed')->name('documents.download');
+    // Documents (downloads; the controller performs the authorisation check)
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
 });
 
 require __DIR__.'/auth.php';

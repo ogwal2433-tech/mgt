@@ -69,7 +69,7 @@ class DashboardController extends Controller
             'monthly_expenditure' => Payment::where('status', 'completed')
                 ->whereBetween('payment_date', [now()->startOfMonth(), now()->endOfMonth()])
                 ->sum('amount'),
-            'currency' => \App\Support\Settings::get('finance.currency', 'USD'),
+            'currency' => \App\Support\Settings::get('finance.currency', 'UGX'),
         ];
     }
 
@@ -92,7 +92,7 @@ class DashboardController extends Controller
                 ->whereNotIn('status', [RequisitionStatus::Closed, RequisitionStatus::Cancelled])
                 ->selectRaw('COALESCE(SUM(amount_paid - amount_accounted), 0) as outstanding')
                 ->value('outstanding'),
-            'currency' => \App\Support\Settings::get('finance.currency', 'USD'),
+            'currency' => \App\Support\Settings::get('finance.currency', 'UGX'),
         ];
     }
 
@@ -113,7 +113,7 @@ class DashboardController extends Controller
             ])->count(),
             'external_forms' => \App\Models\ExternalRequisition::count(),
             'support_tickets' => SupportTicket::whereNotIn('status', ['closed', 'resolved'])->count(),
-            'currency' => \App\Support\Settings::get('finance.currency', 'USD'),
+            'currency' => \App\Support\Settings::get('finance.currency', 'UGX'),
         ];
     }
 
@@ -128,7 +128,7 @@ class DashboardController extends Controller
             'my_rejected' => (clone $myRequisitions)->where('status', 'like', 'REJECTED%')->count(),
             'my_receipts' => PaymentReceipt::where('requester_user_id', $user->id)->count(),
             'my_tasks' => Task::where('assigned_to_employee_id', $user->employee_id)->whereNotIn('status', ['completed', 'cancelled'])->count(),
-            'currency' => \App\Support\Settings::get('finance.currency', 'USD'),
+            'currency' => \App\Support\Settings::get('finance.currency', 'UGX'),
         ];
     }
 

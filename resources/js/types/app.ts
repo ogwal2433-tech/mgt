@@ -40,7 +40,7 @@ export function canAny(user: AuthUser | null | undefined, permissions: string[])
     return permissions.some((p) => can(user, p));
 }
 
-export function formatMoney(amount: number | string | null | undefined, currency = 'USD'): string {
+export function formatMoney(amount: number | string | null | undefined, currency = 'UGX'): string {
     if (amount === null || amount === undefined || amount === '') return `0.00 ${currency}`;
     const n = typeof amount === 'string' ? parseFloat(amount) : amount;
     if (Number.isNaN(n)) return `${amount} ${currency}`;

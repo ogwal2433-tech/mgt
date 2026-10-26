@@ -159,6 +159,8 @@ final class DocumentService
         }
 
         return $user->hasAnyPermission([
+            Permissions::DOCS_REVIEW,
+            Permissions::EMPLOYEES_MANAGE,
             Permissions::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
             Permissions::CONTRACTS_MANAGE,
             Permissions::FINANCE_VIEW,

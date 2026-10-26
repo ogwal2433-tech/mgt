@@ -22,5 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // A stale session/CSRF on logout (or any form) should never show an
+        // error page: send the visitor home where they can sign in again.
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, $request) {
+            return redirect('/');
+        });
     })->create();
