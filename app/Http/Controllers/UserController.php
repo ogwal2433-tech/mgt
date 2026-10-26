@@ -158,6 +158,43 @@ class UserController extends Controller
         return back()->with('success', 'User account updated.');
     }
 
+    /**
+     * Delete a user account (admin only, with safety guards).
+     */
+    public function destroy(User $user)
+    {
+        $actor = request()->user();
+
+        if ($actor && $actor->id === $user->id) {
+            return back()->with('error', 'You cannot delete your own account.');
+        }
+
+        // Never remove the last system administrator.
+        if ($user->hasRole('system_admin')) {
+            $remaining = User::whereHas('roles', fn ($q) => $q->where('slug', 'system_admin'))
+                ->where('id', '!=', $user->id)
+                ->count();
+            if ($remaining === 0) {
+                return back()->with('error', 'The last system administrator cannot be deleted.');
+            }
+        }
+
+        $label = $user->displayName() . ' (' . $user->username . ')';
+
+        try {
+            DB::transaction(function () use ($user) {
+                DB::table('user_roles')->where('user_id', $user->id)->delete();
+                $user->forceDelete();
+            });
+        } catch (\Throwable $e) {
+            return back()->with('error', 'This account has linked records and cannot be deleted. Deactivate it instead.');
+        }
+
+        \App\Support\AuditLogger::log('user.deleted', \App\Models\User::class, $user->id, "Deleted user account: {$label}");
+
+        return back()->with('success', "Account deleted: {$label}.");
+    }
+
     public function permissionsMatrix()
     {
         return Inertia::render('Users/Permissions', [

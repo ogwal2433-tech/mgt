@@ -68,12 +68,28 @@ export default function UsersIndex({ users, roles, employees, filters }: any) {
             key: 'actions',
             header: '',
             render: (row) => (
+                <div className="flex flex-wrap gap-2">
                 <Button size="sm" variant="secondary" onClick={() => {
                     setEditTarget(row);
                     editForm.setData({ name: row.name, email: row.email, roles: (row.roles ?? []).map((r: any) => r.id), is_active: row.is_active, reset_password: '' });
                 }}>
                     Manage
                 </Button>
+                <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={async () => {
+                        const ok = await confirmAction(
+                            'Delete this account?',
+                            `${row.name} (${row.username}) will be permanently removed.`,
+                            'Delete account'
+                        );
+                        if (ok) router.delete(`/users/${row.id}`, { preserveScroll: true });
+                    }}
+                >
+                    Delete
+                </Button>
+                </div>
             ),
         },
     ];

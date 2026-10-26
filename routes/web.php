@@ -124,6 +124,7 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->middleware('permission:system.users')->name('users.index');
     Route::post('/users', [UserController::class, 'store'])->middleware('permission:system.users')->name('users.store');
     Route::put('/users/{user}', [UserController::class, 'update'])->middleware('permission:system.users')->name('users.update');
+Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('permission:system.users')->name('users.destroy');
     Route::post('/users/{user}/invite', [UserController::class, 'invite'])->middleware('permission:system.users')->name('users.invite');
     Route::post('/users/{user}/suspend', [UserController::class, 'suspend'])->middleware('permission:system.users')->name('users.suspend');
     Route::post('/users/{user}/renew', [UserController::class, 'renew'])->middleware('permission:system.users')->name('users.renew');
