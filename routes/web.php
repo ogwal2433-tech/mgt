@@ -202,6 +202,7 @@ Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('
 
     // Documents (downloads; the controller performs the authorisation check)
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+    Route::get('/documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
 });
 
 require __DIR__.'/auth.php';

@@ -90,9 +90,14 @@ export default function DocumentSubmissionShow({ submission: s, canReview }: any
                                                 <p className="text-sm font-medium text-ink-900">{f.document?.original_filename}</p>
                                                 <p className="text-xs text-ink-500">{f.document?.human_size ?? ''} · {formatDate(f.created_at)}</p>
                                             </div>
-                                            <a href={f.document?.download_url} className="text-sm font-semibold text-brand-700 hover:underline">
-                                                Download
-                                            </a>
+                                            <div className="flex items-center gap-3">
+                                                <a href={f.document?.preview_url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-brand-700 hover:underline">
+                                                    Preview
+                                                </a>
+                                                <a href={f.document?.download_url} className="text-sm font-semibold text-brand-700 hover:underline">
+                                                    Download
+                                                </a>
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>

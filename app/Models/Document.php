@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Document extends Model
 {
-    protected $appends = ['download_url'];
+    protected $appends = ['download_url', 'preview_url'];
 
     protected $fillable = [
         'uuid', 'name', 'original_filename', 'path', 'disk', 'mime_type', 'size',
@@ -60,5 +60,10 @@ class Document extends Model
     public function getDownloadUrlAttribute(): string
     {
         return \App\Support\Links::document($this);
+    }
+
+    public function getPreviewUrlAttribute(): string
+    {
+        return route('documents.preview', $this);
     }
 }

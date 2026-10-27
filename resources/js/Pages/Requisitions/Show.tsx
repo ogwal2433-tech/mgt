@@ -225,7 +225,7 @@ export default function RequisitionShow({ requisition: r, can, paymentMethods }:
                                     {r.attachments.map((a: any) => (
                                         <li key={a.id} className="flex items-center justify-between rounded-md border border-gray-100 px-3 py-2">
                                             <span className="text-sm text-gray-800">{a.document?.original_filename}</span>
-                                            <a href={a.document?.download_url} className="text-sm font-semibold text-green-700 hover:underline">
+                                            <a href={a.document?.preview_url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-green-700 hover:underline">Preview</a><a href={a.document?.download_url} className="text-sm font-semibold text-green-700 hover:underline">
                                                 Download
                                             </a>
                                         </li>

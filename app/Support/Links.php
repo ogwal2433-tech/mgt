@@ -27,7 +27,7 @@ final class Links
         return URL::temporarySignedRoute(
             'documents.download',
             now()->addMinutes($ttlMinutes ?? self::DEFAULT_TTL_MINUTES),
-            ['document' => $document->id]
+            ['document' => $document]
         );
     }
 

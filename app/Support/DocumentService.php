@@ -176,10 +176,16 @@ final class DocumentService
         ]);
     }
 
-    public static function stream(Document $document)
+    public static function stream(Document $document, bool $inline = false)
     {
-        return Storage::disk('local')->download($document->path, $document->original_filename, [
+        $headers = [
             'Content-Type' => $document->mime_type ?: 'application/octet-stream',
-        ]);
+        ];
+
+        if (! $inline) {
+            return Storage::disk('local')->download($document->path, $document->original_filename, $headers);
+        }
+
+        return response()->file(Storage::disk('local')->path($document->path), $headers);
     }
 }

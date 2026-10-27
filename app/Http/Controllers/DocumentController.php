@@ -19,4 +19,15 @@ class DocumentController extends Controller
 
         return DocumentService::stream($document);
     }
+
+    public function preview(Document $document): \Symfony\Component\HttpFoundation\Response
+    {
+        if (! DocumentService::readable($document)) {
+            abort(403, 'You are not authorised to preview this document.');
+        }
+
+        AuditLogger::log('document.previewed', Document::class, $document->id, "Previewed {$document->original_filename}");
+
+        return DocumentService::stream($document, true);
+    }
 }
