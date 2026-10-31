@@ -291,15 +291,20 @@ function MeetingShell({ meeting, identity, displayName, isHost }: any) {
             {/* header */}
             <header className="meeting-header">
                 <div className="flex min-w-0 items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-emerald-500 text-sm font-extrabold text-white">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-emerald-500 text-sm font-extrabold text-white shadow-md">
                         B
                     </span>
                     <div className="min-w-0">
-                        <p className="truncate text-sm font-bold text-white">{meeting.title}</p>
-                        <p className="flex items-center gap-2 text-[11px] text-white/50">
+                        <p
+                            className="truncate text-[17px] font-extrabold leading-snug tracking-[-0.01em] text-white"
+                            style={{ textShadow: '0 1px 3px rgba(0,0,0,0.55)' }}
+                        >
+                            {meeting.title}
+                        </p>
+                        <p className="mt-0.5 flex items-center gap-2 text-[11px] font-medium text-white/65">
                             <span className={`h-1.5 w-1.5 rounded-full ${connectionState === 'connected' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
                             {connectionState === 'connected' ? 'Connected' : 'Connecting…'}
-                            <span className="text-white/30">·</span>
+                            <span className="text-white/35">·</span>
                             <span className="font-mono tabular-nums">{elapsed}</span>
                         </p>
                     </div>

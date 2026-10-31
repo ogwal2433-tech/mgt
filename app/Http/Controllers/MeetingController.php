@@ -13,7 +13,6 @@ use App\Support\AuditLogger;
 use App\Support\NotificationService;
 use App\Support\Permissions;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 
 class MeetingController extends Controller
@@ -92,18 +91,14 @@ class MeetingController extends Controller
                 false,
             );
 
-            try {
-                Mail::to($invitee->email)->send(new MeetingInviteMail(
-                    $meeting->title,
-                    $hostName,
-                    $link,
-                    $expiresLabel,
-                    $scheduledLabel,
-                    $accessLabel,
-                ));
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::sendMailable(
+                $invitee,
+                new MeetingInviteMail($meeting->title, $hostName, $link, $expiresLabel, $scheduledLabel, $accessLabel),
+                'Invitation: ' . $meeting->title,
+                'meeting.invited',
+                Meeting::class,
+                $meeting->id,
+            );
         }
 
         foreach (array_unique(array_filter($request->input('guest_emails', []))) as $email) {
@@ -112,18 +107,14 @@ class MeetingController extends Controller
                 ['notified_at' => now()],
             );
 
-            try {
-                Mail::to($email)->send(new MeetingInviteMail(
-                    $meeting->title,
-                    $hostName,
-                    $link,
-                    $expiresLabel,
-                    $scheduledLabel,
-                    $accessLabel,
-                ));
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::sendEmailTo(
+                $email,
+                new MeetingInviteMail($meeting->title, $hostName, $link, $expiresLabel, $scheduledLabel, $accessLabel),
+                'Invitation: ' . $meeting->title,
+                'meeting.invited',
+                Meeting::class,
+                $meeting->id,
+            );
         }
 
         AuditLogger::log('meeting.created', Meeting::class, $meeting->id, "Created meeting \"{$meeting->title}\" ({$meeting->access_mode})");
@@ -210,13 +201,14 @@ class MeetingController extends Controller
                 false,
             );
 
-            try {
-                Mail::to($invitee->email)->send(new MeetingInviteMail(
-                    $meeting->title, $hostName, $link, $expiresLabel, $scheduledLabel, $accessLabel,
-                ));
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::sendMailable(
+                $invitee,
+                new MeetingInviteMail($meeting->title, $hostName, $link, $expiresLabel, $scheduledLabel, $accessLabel),
+                'Invitation: ' . $meeting->title,
+                'meeting.invited',
+                Meeting::class,
+                $meeting->id,
+            );
             $added++;
         }
 
@@ -228,13 +220,14 @@ class MeetingController extends Controller
             );
 
             if (! $exists) {
-                try {
-                    Mail::to($email)->send(new MeetingInviteMail(
-                        $meeting->title, $hostName, $link, $expiresLabel, $scheduledLabel, $accessLabel,
-                    ));
-                } catch (\Throwable $e) {
-                    report($e);
-                }
+                NotificationService::sendEmailTo(
+                    $email,
+                    new MeetingInviteMail($meeting->title, $hostName, $link, $expiresLabel, $scheduledLabel, $accessLabel),
+                    'Invitation: ' . $meeting->title,
+                    'meeting.invited',
+                    Meeting::class,
+                    $meeting->id,
+                );
                 $added++;
             }
         }

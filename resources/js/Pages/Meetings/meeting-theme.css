@@ -7,6 +7,9 @@
 .meeting-page {
     position: fixed;
     inset: 0;
+    font-family: 'Inter', 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     background:
         radial-gradient(1000px 500px at 85% -10%, rgba(16, 185, 129, 0.16), transparent 60%),
         radial-gradient(900px 500px at -10% 110%, rgba(37, 99, 235, 0.18), transparent 55%),
@@ -30,10 +33,11 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 14px 22px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(10, 15, 20, 0.6);
-    backdrop-filter: blur(12px);
+    min-height: 66px;
+    padding: 12px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(10, 15, 20, 0.85);
+    backdrop-filter: blur(14px);
 }
 
 .meeting-chip-btn {

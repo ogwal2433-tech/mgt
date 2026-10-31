@@ -102,6 +102,36 @@ final class NotificationService
         return $delivery;
     }
 
+    /**
+     * Deliver a dedicated mailable to any email address (e.g. guest meeting
+     * invites) and track its delivery status.
+     */
+    public static function sendEmailTo(string $email, \Illuminate\Mail\Mailable $mailable, string $subject, string $type = 'generic', ?string $linkedType = null, ?int $linkedId = null): EmailDelivery
+    {
+        $delivery = EmailDelivery::create([
+            'user_id' => null,
+            'to_email' => $email,
+            'subject' => $subject,
+            'type' => $type,
+            'linked_type' => $linkedType,
+            'linked_id' => $linkedId,
+            'status' => 'pending',
+        ]);
+
+        try {
+            Mail::to($email)->send($mailable);
+            $delivery->update(['status' => 'sent', 'sent_at' => now()]);
+        } catch (\Throwable $e) {
+            $delivery->update([
+                'status' => 'failed',
+                'error' => substr($e->getMessage(), 0, 1000),
+                'retries' => $delivery->retries + 1,
+            ]);
+        }
+
+        return $delivery;
+    }
+
     public static function retry(EmailDelivery $delivery): EmailDelivery
     {
         if (! $delivery->user) {
