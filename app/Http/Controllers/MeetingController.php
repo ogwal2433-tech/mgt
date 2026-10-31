@@ -46,6 +46,7 @@ class MeetingController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:150'],
             'access_mode' => ['required', 'in:' . Meeting::MODE_GUEST . ',' . Meeting::MODE_STAFF],
+            'show_host_role' => ['nullable', 'boolean'],
             'scheduled_at' => ['nullable', 'date'],
             'expires_in' => ['required', 'integer', 'in:60,240,1440,10080,43200'],
             'invitee_ids' => ['array', 'max:100'],
@@ -58,6 +59,7 @@ class MeetingController extends Controller
             'title' => $data['title'],
             'host_user_id' => $request->user()->id,
             'access_mode' => $data['access_mode'],
+            'show_host_role' => (bool) $request->input('show_host_role', false),
             'scheduled_at' => $data['scheduled_at'] ?? now(),
             'link_expires_at' => now()->addMinutes((int) $data['expires_in']),
             'status' => Meeting::STATUS_SCHEDULED,
@@ -402,6 +404,8 @@ class MeetingController extends Controller
             'link' => $meeting->publicLink(),
             'is_host' => $meeting->host_user_id === request()->user()?->id,
             'host' => $meeting->host ? ['id' => $meeting->host->id, 'name' => $meeting->host->displayName()] : null,
+            'show_host_role' => (bool) $meeting->show_host_role,
+            'host_role' => $meeting->show_host_role ? 'Staff at Biiteek' : null,
             'attendee_count' => isset($meeting->attendee_count)
                 ? (int) $meeting->attendee_count
                 : (int) $meeting->participants->count(),

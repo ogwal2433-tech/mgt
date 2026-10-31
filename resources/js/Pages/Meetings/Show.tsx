@@ -113,6 +113,7 @@ export default function MeetingShow({ meeting, staffOptions }: any) {
                                 <h2 className="mt-3 text-2xl font-extrabold tracking-tight">{meeting.title}</h2>
                                 <p className="mt-1 text-sm text-white/70">
                                     Hosted by {meeting.host?.name ?? '—'}
+                                    {meeting.host_role ? ` · ${meeting.host_role}` : ''}
                                     {meeting.scheduled_at ? ` · starts ${formatDateTime(meeting.scheduled_at)}` : ''}
                                 </p>
                             </div>

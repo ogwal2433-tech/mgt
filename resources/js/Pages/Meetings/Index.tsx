@@ -25,6 +25,7 @@ export default function MeetingsIndex({ meetings }: any) {
     const form = useForm({
         title: '',
         access_mode: 'guest',
+        show_host_role: false,
         scheduled_at: '',
         expires_in: 1440,
         invitee_ids: [] as number[],
@@ -212,6 +213,21 @@ export default function MeetingsIndex({ meetings }: any) {
                             ))}
                         </div>
                     </div>
+
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-gray-300">
+                        <input
+                            type="checkbox"
+                            checked={!!form.data.show_host_role}
+                            onChange={(e: any) => form.setData('show_host_role', e.target.checked)}
+                            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-600"
+                        />
+                        <span>
+                            <span className="block text-sm font-semibold text-ink-800">Show my role to participants</span>
+                            <span className="mt-0.5 block text-xs text-ink-500">
+                                Participants will see you as <span className="font-semibold text-ink-700">Staff at Biiteek</span> next to your name.
+                            </span>
+                        </span>
+                    </label>
 
                     <div className="grid gap-4 sm:grid-cols-2">
                         <Field label="Starts at (optional)">

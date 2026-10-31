@@ -76,6 +76,7 @@ export default function MeetingJoin({ state, meeting, guestName, publicId }: any
                                 </h1>
                                 <p className="mt-2 text-sm font-medium text-white/80">
                                     {meeting.host ? `Hosted by ${meeting.host}` : 'Video conference'}
+                                    {meeting.host_role ? ` · ${meeting.host_role}` : ''}
                                     {meeting.link_expires_at && (
                                         <>
                                             {' · link valid until '}

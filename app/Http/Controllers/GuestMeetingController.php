@@ -32,6 +32,7 @@ class GuestMeetingController extends Controller
             'meeting' => $meeting ? [
                 'title' => $meeting->title,
                 'host' => $meeting->host?->displayName(),
+                'host_role' => $meeting->show_host_role ? 'Staff at Biiteek' : null,
                 'scheduled_at' => $meeting->scheduled_at?->toIso8601String(),
                 'link_expires_at' => $meeting->link_expires_at?->toIso8601String(),
             ] : null,
@@ -111,6 +112,8 @@ class GuestMeetingController extends Controller
                 'link_expires_at' => $meeting->link_expires_at?->toIso8601String(),
                 'link' => $meeting->publicLink(),
                 'is_host' => false,
+                'show_host_role' => (bool) $meeting->show_host_role,
+                'host_role' => $meeting->show_host_role ? 'Staff at Biiteek' : null,
                 'host' => $meeting->host ? ['id' => $meeting->host->id, 'name' => $meeting->host->displayName()] : null,
             ],
         ]);

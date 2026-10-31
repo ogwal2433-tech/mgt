@@ -18,13 +18,14 @@ class Meeting extends Model
     public const STATUS_EXPIRED = 'expired';
 
     protected $fillable = [
-        'public_id', 'title', 'host_user_id', 'access_mode',
+        'public_id', 'title', 'host_user_id', 'access_mode', 'show_host_role',
         'scheduled_at', 'link_expires_at', 'status', 'ended_at',
     ];
 
     protected function casts(): array
     {
         return [
+            'show_host_role' => 'boolean',
             'scheduled_at' => 'datetime',
             'link_expires_at' => 'datetime',
             'ended_at' => 'datetime',
