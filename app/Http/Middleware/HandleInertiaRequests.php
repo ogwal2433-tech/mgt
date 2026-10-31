@@ -140,9 +140,18 @@ class HandleInertiaRequests extends \Inertia\Middleware
             ->count();
 
         $disbursementCount = \App\Models\Requisition::whereIn('status', [
-                \App\Enums\RequisitionStatus::ApprovedAwaitingDisbursement,
-                \App\Enums\RequisitionStatus::PartiallyDisbursed,
+                \App\Models\Enums\RequisitionStatus::ApprovedAwaitingDisbursement,
+                \App\Models\Enums\RequisitionStatus::PartiallyDisbursed,
             ])->count();
+
+        $meetingCount = \App\Models\Meeting::query()
+            ->where(function ($q) use ($user) {
+                $q->where('host_user_id', $user->id)
+                    ->orWhereHas('invitations', fn ($i) => $i->where('user_id', $user->id));
+            })
+            ->whereIn('status', [\App\Models\Meeting::STATUS_SCHEDULED, \App\Models\Meeting::STATUS_LIVE])
+            ->where('link_expires_at', '>', now())
+            ->count();
 
         $items = [
             ['label' => 'Dashboard', 'href' => '/dashboard', 'icon' => 'dashboard', 'show' => true],
@@ -159,7 +168,7 @@ class HandleInertiaRequests extends \Inertia\Middleware
             ['label' => 'Payroll', 'href' => '/payroll', 'icon' => 'cash', 'show' => $any([P::PAYROLL_VIEW, P::PAYROLL_RUN])],
             ['label' => 'My Payslips', 'href' => '/my-payslips', 'icon' => 'receipt', 'show' => true],
                 ['label' => 'Document Submissions', 'href' => '/documents-submissions', 'icon' => 'file-text', 'show' => $any([P::DOCS_SUBMIT, P::DOCS_REVIEW])],
-                ['label' => 'Meetings', 'href' => '/meetings', 'icon' => 'video', 'show' => $any([P::MEETINGS_VIEW, P::MEETINGS_CREATE, P::MEETINGS_MANAGE])],
+                ['label' => 'Meetings', 'href' => '/meetings', 'icon' => 'video', 'show' => $any([P::MEETINGS_VIEW, P::MEETINGS_CREATE, P::MEETINGS_MANAGE]), 'badge' => $meetingCount],
             ['label' => 'Disbursements', 'href' => '/disbursements', 'icon' => 'cash', 'show' => $any([P::FINANCE_DISBURSE, P::FINANCE_VIEW]), 'badge' => $disbursementCount],
             ['label' => 'Payment Receipts', 'href' => '/receipts', 'icon' => 'receipt', 'show' => $any([P::FINANCE_VIEW, P::FINANCE_DISBURSE, P::REQUISITIONS_CREATE])],
             ['label' => 'Accountability', 'href' => '/accountability', 'icon' => 'clipboard-check', 'show' => $any([P::FINANCE_ACCOUNTABILITY_REVIEW, P::REQUISITIONS_CREATE, P::FINANCE_VIEW])],
