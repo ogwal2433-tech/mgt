@@ -243,7 +243,17 @@ export default function MeetingShow({ meeting, staffOptions }: any) {
                 <div className="space-y-6">
                     {/* Participants */}
                     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                        <h3 className="text-sm font-bold text-ink-900">People</h3>
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-sm font-bold text-ink-900">Attendance</h3>
+                            <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[11px] font-bold text-brand-700">
+                                {meeting.attendee_count ?? 0} attended
+                            </span>
+                        </div>
+
+                        <div className="mt-3 rounded-xl bg-gradient-to-br from-brand-600 to-emerald-500 px-4 py-3 text-white shadow-sm">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-white/80">People who attended</p>
+                            <p className="mt-0.5 text-3xl font-extrabold leading-none">{meeting.attendee_count ?? 0}</p>
+                        </div>
 
                         <div className="mt-3 space-y-2">
                             <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">Invited</p>

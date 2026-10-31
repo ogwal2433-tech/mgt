@@ -27,6 +27,7 @@ class MeetingController extends Controller
                     ->orWhereHas('invitations', fn ($i) => $i->where('user_id', $user->id));
             })
             ->with(['host:id,name,username', 'invitations.user:id,name'])
+            ->withCount('participants as attendee_count')
             ->orderByDesc('scheduled_at')
             ->orderByDesc('id')
             ->get()
@@ -401,6 +402,9 @@ class MeetingController extends Controller
             'link' => $meeting->publicLink(),
             'is_host' => $meeting->host_user_id === request()->user()?->id,
             'host' => $meeting->host ? ['id' => $meeting->host->id, 'name' => $meeting->host->displayName()] : null,
+            'attendee_count' => isset($meeting->attendee_count)
+                ? (int) $meeting->attendee_count
+                : (int) $meeting->participants->count(),
         ];
 
         if (! $detailed) {

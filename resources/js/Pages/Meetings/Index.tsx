@@ -142,9 +142,17 @@ export default function MeetingsIndex({ meetings }: any) {
 
                                 <div className="mt-5 flex items-center gap-2">
                                     {m.status === 'ended' || m.status === 'expired' ? (
-                                        <span className="flex-1 cursor-not-allowed rounded-lg border border-gray-200 bg-ink-50 px-3 py-2 text-center text-xs font-semibold text-ink-400">
-                                            Closed
-                                        </span>
+                                        <>
+                                            <span className="flex-1 cursor-not-allowed rounded-lg border border-gray-200 bg-ink-50 px-3 py-2 text-center text-xs font-semibold text-ink-400">
+                                                Closed
+                                            </span>
+                                            <Link
+                                                href={`/meetings/${m.id}`}
+                                                className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-center text-xs font-semibold text-ink-700 transition hover:bg-ink-50"
+                                            >
+                                                Attendees ({m.attendee_count ?? 0})
+                                            </Link>
+                                        </>
                                     ) : (
                                         <>
                                             <Link
