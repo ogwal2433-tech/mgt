@@ -28,6 +28,9 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@livekit/components-react": "^2.9.24",
+        "@livekit/components-styles": "^1.2.0",
+        "livekit-client": "^2.23.0",
         "signature_pad": "^5.1.4",
         "sweetalert2": "^11.26.25"
     }

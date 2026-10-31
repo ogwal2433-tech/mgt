@@ -1,0 +1,228 @@
+/* ------------------------------------------------------------------
+   Biiteek Global · Meeting room theme (premium dark)
+   ------------------------------------------------------------------ */
+
+.meeting-page {
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(1000px 500px at 85% -10%, rgba(16, 185, 129, 0.16), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(37, 99, 235, 0.18), transparent 55%),
+        #0a0f14;
+    overflow: hidden;
+}
+
+.meeting-lk {
+    height: 100%;
+}
+
+.meeting-shell {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+}
+
+/* header */
+.meeting-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(10, 15, 20, 0.6);
+    backdrop-filter: blur(12px);
+}
+
+.meeting-chip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.06);
+    transition: all 0.15s ease;
+}
+
+.meeting-chip-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.meeting-chip-btn--danger {
+    border-color: rgba(248, 113, 113, 0.4);
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.12);
+}
+
+.meeting-chip-btn--danger:hover {
+    background: rgba(239, 68, 68, 0.22);
+    color: #fecaca;
+}
+
+/* stage / grid */
+.meeting-stage {
+    flex: 1;
+    min-height: 0;
+    padding: 18px 22px 8px;
+}
+
+.meeting-stage .lk-grid-layout {
+    gap: 14px;
+    height: 100%;
+}
+
+.meeting-stage .lk-participant-tile {
+    border-radius: 18px;
+    overflow: hidden;
+    background: #111820;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.6);
+}
+
+.meeting-stage .lk-participant-placeholder {
+    background: #111820;
+}
+
+.meeting-stage .lk-participant-metadata {
+    padding: 10px 12px;
+}
+
+.meeting-stage .lk-participant-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+/* controls */
+.meeting-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 22px 20px;
+}
+
+.meeting-controls .lk-control-bar {
+    display: flex;
+    gap: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    backdrop-filter: blur(12px);
+}
+
+.meeting-controls .lk-button {
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: none;
+    transition: all 0.15s ease;
+}
+
+.meeting-controls .lk-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.meeting-controls .lk-button[data-lk-source='camera'] {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.meeting-controls .lk-button.lk-button-off {
+    background: #dc2626;
+    color: #fff;
+}
+
+.meeting-controls .lk-button[data-lk-source='screen_share'].lk-button-off {
+    background: #16a34a;
+}
+
+.meeting-controls .lk-leave-button {
+    background: #dc2626;
+    color: #fff;
+    border-radius: 999px;
+    width: 56px;
+    height: 46px;
+}
+
+.meeting-controls .lk-leave-button:hover {
+    background: #ef4444;
+}
+
+.meeting-control-extra {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.07);
+    color: rgba(255, 255, 255, 0.85);
+    padding: 0 18px;
+    height: 46px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+}
+
+.meeting-control-extra:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+/* side panel sits as a flex row child on large screens */
+.meeting-shell aside {
+    position: absolute;
+    top: 65px;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    border-radius: 18px 0 0 0;
+    box-shadow: -20px 0 50px -20px rgba(0, 0, 0, 0.55);
+}
+
+/* overlays */
+.meeting-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(6, 10, 14, 0.82);
+    backdrop-filter: blur(10px);
+}
+
+.meeting-overlay-card {
+    width: min(420px, 92vw);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #10161d;
+    padding: 40px 34px;
+    text-align: center;
+    box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.8);
+}
+
+/* mobile */
+@media (max-width: 768px) {
+    .meeting-shell aside {
+        width: 100%;
+        top: 58px;
+        border-radius: 0;
+    }
+
+    .meeting-header {
+        padding: 10px 14px;
+    }
+
+    .meeting-stage {
+        padding: 12px 12px 4px;
+    }
+}

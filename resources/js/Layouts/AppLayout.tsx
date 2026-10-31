@@ -3,6 +3,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import { AuthUser, NavItem } from '@/types/app';
 import FlashMessages from '@/Components/ui/FlashMessages';
 import Icon from '@/Components/ui/Icon';
+import CountdownBanner from '@/Components/Meetings/CountdownBanner';
 
 export default function AppLayout({
     children,
@@ -163,6 +164,8 @@ export default function AppLayout({
                         </button>
                     </div>
                 </header>
+
+                <CountdownBanner />
 
                 <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
                     {(title || actions) && (

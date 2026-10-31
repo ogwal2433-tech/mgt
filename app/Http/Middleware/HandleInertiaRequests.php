@@ -55,11 +55,51 @@ class HandleInertiaRequests extends \Inertia\Middleware
 
                 return $user->notificationsLog()->unread()->count();
             },
+            'meetings' => fn () => [
+                'upcoming' => $this->upcomingMeetings($request->user()),
+            ],
             'navigation' => fn () => $this->navigationFor($request->user()),            'app' => [
                 'name' => config('app.name'),
                 'timezone' => config('app.timezone'),
             ],
         ]);
+    }
+
+    /**
+     * Upcoming meetings the user hosts or is invited to — drives the countdown banner.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function upcomingMeetings(?object $user): array
+    {
+        if (! $user) {
+            return [];
+        }
+
+        return \App\Models\Meeting::query()
+            ->where(function ($q) use ($user) {
+                $q->where('host_user_id', $user->id)
+                    ->orWhereHas('invitations', fn ($i) => $i->where('user_id', $user->id));
+            })
+            ->where('status', '!=', \App\Models\Meeting::STATUS_ENDED)
+            ->where('link_expires_at', '>', now())
+            ->where(function ($q) {
+                $q->whereNull('scheduled_at')->orWhere('scheduled_at', '>=', now()->subHour());
+            })
+            ->orderByRaw('COALESCE(scheduled_at, created_at) ASC')
+            ->limit(3)
+            ->get(['id', 'title', 'public_id', 'host_user_id', 'scheduled_at', 'link_expires_at', 'status'])
+            ->map(fn ($m) => [
+                'id' => $m->id,
+                'title' => $m->title,
+                'scheduled_at' => $m->scheduled_at?->toIso8601String(),
+                'starts_in_seconds' => $m->scheduled_at ? max(0, (int) now()->diffInSeconds($m->scheduled_at, false)) : 0,
+                'is_host' => $m->host_user_id === $user->id,
+                'join_url' => '/meetings/' . $m->id . '/room',
+                'detail_url' => '/meetings/' . $m->id,
+            ])
+            ->values()
+            ->all();
     }
 
     /**
@@ -118,7 +158,8 @@ class HandleInertiaRequests extends \Inertia\Middleware
             ['label' => 'Client Invoicing', 'href' => '/invoices', 'icon' => 'send', 'show' => $any([P::INVOICES_VIEW, P::INVOICES_MANAGE])],
             ['label' => 'Payroll', 'href' => '/payroll', 'icon' => 'cash', 'show' => $any([P::PAYROLL_VIEW, P::PAYROLL_RUN])],
             ['label' => 'My Payslips', 'href' => '/my-payslips', 'icon' => 'receipt', 'show' => true],
-            ['label' => 'Document Submissions', 'href' => '/documents-submissions', 'icon' => 'file-text', 'show' => $any([P::DOCS_SUBMIT, P::DOCS_REVIEW])],
+                ['label' => 'Document Submissions', 'href' => '/documents-submissions', 'icon' => 'file-text', 'show' => $any([P::DOCS_SUBMIT, P::DOCS_REVIEW])],
+                ['label' => 'Meetings', 'href' => '/meetings', 'icon' => 'video', 'show' => $any([P::MEETINGS_VIEW, P::MEETINGS_CREATE, P::MEETINGS_MANAGE])],
             ['label' => 'Disbursements', 'href' => '/disbursements', 'icon' => 'cash', 'show' => $any([P::FINANCE_DISBURSE, P::FINANCE_VIEW]), 'badge' => $disbursementCount],
             ['label' => 'Payment Receipts', 'href' => '/receipts', 'icon' => 'receipt', 'show' => $any([P::FINANCE_VIEW, P::FINANCE_DISBURSE, P::REQUISITIONS_CREATE])],
             ['label' => 'Accountability', 'href' => '/accountability', 'icon' => 'clipboard-check', 'show' => $any([P::FINANCE_ACCOUNTABILITY_REVIEW, P::REQUISITIONS_CREATE, P::FINANCE_VIEW])],

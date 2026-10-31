@@ -74,6 +74,11 @@ final class Permissions
     public const DOCS_SUBMIT = 'docs.submit';
     public const DOCS_REVIEW = 'docs.review';
 
+    // Meetings (video conferencing)
+    public const MEETINGS_CREATE = 'meetings.create';
+    public const MEETINGS_VIEW = 'meetings.view';
+    public const MEETINGS_MANAGE = 'meetings.manage';
+
     // Platform
     public const AUDIT_VIEW = 'audit.view';
     public const SYSTEM_SETTINGS = 'system.settings';
@@ -139,6 +144,10 @@ final class Permissions
 
             self::DOCS_SUBMIT => ['Submit documents', 'Submit documents to HR and follow their status'],
             self::DOCS_REVIEW => ['Review document submissions', 'Accept or reject employee document submissions'],
+
+            self::MEETINGS_CREATE => ['Create meetings', 'Create and host video conference meetings'],
+            self::MEETINGS_VIEW => ['View meetings', 'See meetings and join invited ones'],
+            self::MEETINGS_MANAGE => ['Manage all meetings', 'Moderate or end any meeting company-wide'],
 
             self::AUDIT_VIEW => ['Audit logs', 'Read the audit trail'],
             self::SYSTEM_SETTINGS => ['System settings', 'Application configuration'],

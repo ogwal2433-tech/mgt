@@ -9,6 +9,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ExternalRequisitionController;
+use App\Http\Controllers\GuestMeetingController;
+use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -38,6 +40,15 @@ Route::prefix('share')->middleware(['throttle:30,1'])->group(function () {
     Route::post('/external-requisitions/{token}', [\App\Http\Controllers\ExternalShareController::class, 'submit'])
         ->middleware('throttle:10,1')
         ->name('external-share.submit');
+});
+
+// Public meeting join (guests: display name only, unpredictable link ids).
+Route::prefix('meet')->middleware(['throttle:60,1'])->group(function () {
+    Route::get('/{publicId}', [GuestMeetingController::class, 'show'])->name('meetings.guest');
+    Route::post('/{publicId}/join', [GuestMeetingController::class, 'join'])->middleware('throttle:10,1')->name('meetings.guest.join');
+    Route::get('/{publicId}/room', [GuestMeetingController::class, 'room'])->name('meetings.guest.room');
+    Route::get('/{publicId}/chat', [GuestMeetingController::class, 'chatHistory'])->name('meetings.guest.chat-history');
+    Route::post('/{publicId}/chat', [GuestMeetingController::class, 'chat'])->middleware('throttle:60,1')->name('meetings.guest.chat');
 });
 
 Route::middleware(['auth', 'active'])->group(function () {
@@ -203,6 +214,17 @@ Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('
     // Documents (downloads; the controller performs the authorisation check)
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
     Route::get('/documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
+
+    // Meetings (Biiteek Global video conferencing)
+    Route::get('/meetings', [MeetingController::class, 'index'])->middleware('permission:meetings.view,meetings.create,meetings.manage')->name('meetings.index');
+    Route::post('/meetings', [MeetingController::class, 'store'])->middleware('permission:meetings.create')->name('meetings.store');
+    Route::get('/meetings/{meeting}', [MeetingController::class, 'show'])->middleware('permission:meetings.view,meetings.create,meetings.manage')->name('meetings.show');
+    Route::get('/meetings/{meeting}/room', [MeetingController::class, 'room'])->name('meetings.room');
+    Route::post('/meetings/{meeting}/invite', [MeetingController::class, 'invite'])->name('meetings.invite');
+    Route::post('/meetings/{meeting}/end', [MeetingController::class, 'end'])->name('meetings.end');
+    Route::delete('/meetings/{meeting}/participants/{identity}', [MeetingController::class, 'removeParticipant'])->name('meetings.participants.remove');
+    Route::get('/meetings/{meeting}/chat', [MeetingController::class, 'chatIndex'])->name('meetings.chat.index');
+    Route::post('/meetings/{meeting}/chat', [MeetingController::class, 'chatStore'])->name('meetings.chat.store');
 });
 
 require __DIR__.'/auth.php';

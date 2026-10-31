@@ -28,6 +28,7 @@ class RolePermissionSeeder extends Seeder
                     P::PAYROLL_VIEW, P::PAYROLL_APPROVE, P::INVOICES_VIEW,
                     P::REPORTS_EXECUTIVE, P::REPORTS_FINANCIAL, P::REPORTS_HR, P::REPORTS_TECHNICAL,
                     P::DOCS_SUBMIT,
+                    P::MEETINGS_CREATE, P::MEETINGS_VIEW, P::MEETINGS_MANAGE,
                     P::AUDIT_VIEW, P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
                 ],
             ],
@@ -45,6 +46,7 @@ class RolePermissionSeeder extends Seeder
                     P::PROJECTS_VIEW, P::PROCUREMENT_MANAGE, P::INVENTORY_MANAGE, P::ASSETS_MANAGE,
                     P::REPORTS_EXECUTIVE, P::REPORTS_FINANCIAL, P::REPORTS_HR,
                     P::DOCS_SUBMIT, P::DOCS_REVIEW,
+                    P::MEETINGS_CREATE, P::MEETINGS_VIEW,
                     P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
                 ],
             ],
@@ -56,6 +58,7 @@ class RolePermissionSeeder extends Seeder
                     P::PAYROLL_VIEW, P::PAYROLL_RUN, P::PAYROLL_PAY,
                     P::INVOICES_VIEW, P::INVOICES_PAYMENTS,
         P::DOCS_SUBMIT, P::DOCS_REVIEW,
+        P::MEETINGS_CREATE, P::MEETINGS_VIEW,
         P::REPORTS_FINANCIAL, P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
                 ],
             ],
@@ -68,6 +71,7 @@ class RolePermissionSeeder extends Seeder
                     P::PROJECTS_MANAGE, P::PROJECTS_VIEW, P::TASKS_UPDATE, P::SUPPORT_TICKETS,
                     P::REPORTS_TECHNICAL,
                     P::DOCS_SUBMIT,
+                    P::MEETINGS_CREATE, P::MEETINGS_VIEW,
                 ],
             ],
             'technical_staff' => [
@@ -76,6 +80,7 @@ class RolePermissionSeeder extends Seeder
                     P::PROJECTS_VIEW, P::TASKS_UPDATE, P::SUPPORT_TICKETS,
                     P::REQUISITIONS_CREATE,
                     P::DOCS_SUBMIT,
+                    P::MEETINGS_CREATE, P::MEETINGS_VIEW,
                 ],
             ],
             'system_admin' => [
@@ -84,6 +89,7 @@ class RolePermissionSeeder extends Seeder
                 'permissions' => [
         P::AUDIT_VIEW, P::SYSTEM_SETTINGS, P::SYSTEM_USERS, P::SYSTEM_ROLES,
         P::DOCS_SUBMIT, P::DOCS_REVIEW,
+        P::MEETINGS_CREATE, P::MEETINGS_VIEW, P::MEETINGS_MANAGE,
                 ],
             ],
         ];
