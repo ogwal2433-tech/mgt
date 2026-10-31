@@ -45,7 +45,7 @@ Route::prefix('share')->middleware(['throttle:30,1'])->group(function () {
 // Public meeting join (guests: display name only, unpredictable link ids).
 Route::prefix('meet')->middleware(['throttle:60,1'])->group(function () {
     Route::get('/{publicId}', [GuestMeetingController::class, 'show'])->name('meetings.guest');
-    Route::post('/{publicId}/join', [GuestMeetingController::class, 'join'])->middleware('throttle:10,1')->name('meetings.guest.join');
+    Route::post('/{publicId}/join', [GuestMeetingController::class, 'join'])->middleware('throttle:30,1')->name('meetings.guest.join');
     Route::get('/{publicId}/room', [GuestMeetingController::class, 'room'])->name('meetings.guest.room');
     Route::get('/{publicId}/chat', [GuestMeetingController::class, 'chatHistory'])->name('meetings.guest.chat-history');
     Route::post('/{publicId}/chat', [GuestMeetingController::class, 'chat'])->middleware('throttle:60,1')->name('meetings.guest.chat');

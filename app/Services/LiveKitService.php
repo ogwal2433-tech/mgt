@@ -90,8 +90,9 @@ final class LiveKitService
     private static function twirp(string $method, array $payload): array
     {
         $base = self::restBase();
+        $room = (string) ($payload['room'] ?? '');
 
-        $response = Http::withToken(self::serverToken())
+        $response = Http::withToken(self::serverToken($room))
             ->asJson()
             ->timeout(15)
             ->post("{$base}/twirp/{$method}", $payload);
@@ -110,8 +111,13 @@ final class LiveKitService
         return rtrim(preg_replace('/^wss:/', 'https:', preg_replace('/^ws:/', 'http:', $url)), '/');
     }
 
-    /** Server-side token with room admin rights over all rooms. */
-    private static function serverToken(): string
+    /**
+     * Server-side token with room admin rights.
+     *
+     * LiveKit requires the admin grant to be scoped to the exact target room,
+     * so the room name must be part of the video grants.
+     */
+    private static function serverToken(string $room): string
     {
         $now = time();
 
@@ -121,6 +127,7 @@ final class LiveKitService
             'iss' => config('services.livekit.key'),
             'sub' => 'server',
             'video' => [
+                'room' => $room,
                 'roomAdmin' => true,
                 'roomCreate' => true,
                 'canRemoveOthers' => true,
