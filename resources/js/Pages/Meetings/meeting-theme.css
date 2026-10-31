@@ -2,6 +2,8 @@
    Biiteek Global · Meeting room theme (premium dark)
    ------------------------------------------------------------------ */
 
+@import '@livekit/components-styles';
+
 .meeting-page {
     position: fixed;
     inset: 0;
@@ -98,63 +100,98 @@
     color: rgba(255, 255, 255, 0.92);
 }
 
-/* controls */
+/* controls — compact glass pill, docked bottom-centre */
 .meeting-controls {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    padding: 14px 22px 20px;
+    padding: 10px 22px 18px;
 }
 
 .meeting-controls .lk-control-bar {
     display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
     gap: 10px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 8px 12px;
-    backdrop-filter: blur(12px);
+    background: rgba(15, 21, 28, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 8px 14px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.7);
 }
 
 .meeting-controls .lk-button {
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.12);
     color: #fff;
     border: none;
     transition: all 0.15s ease;
 }
 
+.meeting-controls .lk-button svg {
+    width: 20px;
+    height: 20px;
+}
+
 .meeting-controls .lk-button:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.22);
     transform: translateY(-1px);
 }
 
-.meeting-controls .lk-button[data-lk-source='camera'] {
-    background: rgba(255, 255, 255, 0.1);
-}
-
+/* mic muted / camera off -> red */
 .meeting-controls .lk-button.lk-button-off {
-    background: #dc2626;
+    background: #e11d48;
     color: #fff;
 }
 
+.meeting-controls .lk-button.lk-button-off:hover {
+    background: #f43f5e;
+}
+
+/* screen share: neutral when idle, green when sharing */
 .meeting-controls .lk-button[data-lk-source='screen_share'].lk-button-off {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+.meeting-controls .lk-button[data-lk-source='screen_share'].lk-button-off:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.meeting-controls .lk-button[data-lk-source='screen_share']:not(.lk-button-off) {
     background: #16a34a;
 }
 
+.meeting-controls .lk-button[data-lk-source='screen_share']:not(.lk-button-off):hover {
+    background: #22c55e;
+}
+
+/* leave -> red pill */
 .meeting-controls .lk-leave-button {
-    background: #dc2626;
+    background: #e11d48;
     color: #fff;
+    border: none;
     border-radius: 999px;
-    width: 56px;
-    height: 46px;
+    width: 60px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
 }
 
 .meeting-controls .lk-leave-button:hover {
-    background: #ef4444;
+    background: #f43f5e;
+    transform: translateY(-1px);
 }
 
 .meeting-control-extra {
@@ -162,19 +199,26 @@
     align-items: center;
     gap: 8px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(15, 21, 28, 0.88);
     color: rgba(255, 255, 255, 0.85);
     padding: 0 18px;
-    height: 46px;
+    height: 60px;
     font-size: 12px;
     font-weight: 700;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.7);
     transition: all 0.15s ease;
 }
 
 .meeting-control-extra:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.16);
     color: #fff;
+}
+
+.meeting-control-extra svg {
+    width: 18px;
+    height: 18px;
 }
 
 /* side panel sits as a flex row child on large screens */
