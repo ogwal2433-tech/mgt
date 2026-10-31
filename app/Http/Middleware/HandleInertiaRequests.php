@@ -140,8 +140,8 @@ class HandleInertiaRequests extends \Inertia\Middleware
             ->count();
 
         $disbursementCount = \App\Models\Requisition::whereIn('status', [
-                \App\Models\Enums\RequisitionStatus::ApprovedAwaitingDisbursement,
-                \App\Models\Enums\RequisitionStatus::PartiallyDisbursed,
+                \App\Enums\RequisitionStatus::ApprovedAwaitingDisbursement,
+                \App\Enums\RequisitionStatus::PartiallyDisbursed,
             ])->count();
 
         $meetingCount = \App\Models\Meeting::query()
