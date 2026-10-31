@@ -78,6 +78,23 @@ class Meeting extends Model
         return $this->host_user_id === $user->id;
     }
 
+    /**
+     * Role label shown to participants next to the host's name.
+     * Default: "Staff at Biiteek"; with show_host_role enabled the host's
+     * actual role (e.g. Managing Director) is displayed instead.
+     */
+    public function hostRoleLabel(): string
+    {
+        if ($this->show_host_role) {
+            $roles = $this->host?->roles->pluck('name')->filter()->join(', ');
+            if ($roles !== '') {
+                return $roles;
+            }
+        }
+
+        return 'Staff at Biiteek';
+    }
+
     public function isExpired(): bool
     {
         return $this->link_expires_at !== null && $this->link_expires_at->isPast();

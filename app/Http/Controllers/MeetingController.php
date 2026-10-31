@@ -346,6 +346,11 @@ class MeetingController extends Controller
 
     private function renderRoom(Meeting $meeting, string $identity, string $displayName, bool $isHost, ?int $userId = null)
     {
+        // The host is displayed to participants as "Name — role label".
+        if ($userId !== null && $meeting->host_user_id === $userId) {
+            $displayName .= ' — ' . $meeting->hostRoleLabel();
+        }
+
         $meeting->participants()->updateOrCreate(
             ['meeting_id' => $meeting->id, 'identity' => $identity],
             [
@@ -405,7 +410,7 @@ class MeetingController extends Controller
             'is_host' => $meeting->host_user_id === request()->user()?->id,
             'host' => $meeting->host ? ['id' => $meeting->host->id, 'name' => $meeting->host->displayName()] : null,
             'show_host_role' => (bool) $meeting->show_host_role,
-            'host_role' => $meeting->show_host_role ? 'Staff at Biiteek' : null,
+            'host_role' => $meeting->hostRoleLabel(),
             'attendee_count' => isset($meeting->attendee_count)
                 ? (int) $meeting->attendee_count
                 : (int) $meeting->participants->count(),

@@ -230,9 +230,6 @@ function SidePanel({ room, meeting, identity, displayName, isHost, onClose }: an
                                         {name}
                                         {p.identity === identity && <span className="ml-1 text-[10px] font-medium text-white/40">(you)</span>}
                                     </p>
-                                    {meeting.host_role && p.identity === `user:${meeting.host?.id}` && (
-                                        <p className="text-[10px] font-semibold text-emerald-300">{meeting.host_role}</p>
-                                    )}
                                     <p className="flex items-center gap-1 text-[10px] text-white/40">
                                         <svg className={`h-3 w-3 ${muted ? 'text-red-400' : 'text-emerald-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             {muted ? (

@@ -224,7 +224,9 @@ export default function MeetingsIndex({ meetings }: any) {
                         <span>
                             <span className="block text-sm font-semibold text-ink-800">Show my role to participants</span>
                             <span className="mt-0.5 block text-xs text-ink-500">
-                                Participants will see you as <span className="font-semibold text-ink-700">Staff at Biiteek</span> next to your name.
+                                Participants see you as{' '}
+                                <span className="font-semibold text-ink-700">“Your name — Staff at Biiteek”</span> by default. Enable this
+                                to show your actual role instead (e.g. Managing Director).
                             </span>
                         </span>
                     </label>
