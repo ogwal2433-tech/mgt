@@ -260,11 +260,45 @@ function SidePanel({ room, meeting, identity, displayName, isHost, onClose }: an
 }
 
 /* ------------------------------------------------------------------ */
+/* video tile with a mic-muted badge visible to everyone               */
+/* ------------------------------------------------------------------ */
+
+function Tile({ trackRef }: any) {
+    const participant = trackRef.participant;
+    let micOff = true;
+    try {
+        const pub = participant.getTrackPublication?.(Track.Source.Microphone);
+        micOff = !pub || pub.isMuted;
+    } catch {
+        /* participant may have left */
+    }
+
+    return (
+        <div className="meeting-tile">
+            <ParticipantTile trackRef={trackRef} />
+            {micOff && (
+                <div className="meeting-tile-badge">
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l4 4m0-4l-4 4" />
+                    </svg>
+                    Muted
+                </div>
+            )}
+        </div>
+    );
+}
+
+/* ------------------------------------------------------------------ */
 /* meeting shell (inside LiveKitRoom)                                  */
 /* ------------------------------------------------------------------ */
 
 function MeetingShell({ meeting, identity, displayName, isHost }: any) {
-    const tracks = useTracks([{ source: Track.Source.Camera, withPlaceholder: true }]);
+    const tracks = useTracks([
+        { source: Track.Source.Camera, withPlaceholder: true },
+        { source: Track.Source.ScreenShare },
+    ]);
+    const cameraTracks = tracks.filter((t: any) => t.source !== Track.Source.ScreenShare);
+    const screenTracks = tracks.filter((t: any) => t.source === Track.Source.ScreenShare);
     const connectionState = useConnectionState();
     const elapsed = useElapsed();
     const [panelOpen, setPanelOpen] = useState(false);
@@ -322,24 +356,47 @@ function MeetingShell({ meeting, identity, displayName, isHost }: any) {
                 </div>
             </header>
 
-            {/* video grid */}
+            {/* video stage: shared screens big, camera tiles in a strip */}
             <div className="meeting-stage">
-                <GridLayout tracks={tracks}>
-                    <ParticipantTile />
-                </GridLayout>
+                {screenTracks.length > 0 ? (
+                    <div className="meeting-screens">
+                        <div className="meeting-screen-main">
+                            {screenTracks.map((tr: any) => (
+                                <Tile key={`screen-${tr.participant.identity}`} trackRef={tr} />
+                            ))}
+                        </div>
+                        <div className="meeting-grid meeting-grid--strip">
+                            {cameraTracks.map((tr: any) => (
+                                <Tile key={`cam-${tr.participant.identity}`} trackRef={tr} />
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="meeting-grid">
+                        {cameraTracks.map((tr: any) => (
+                            <Tile key={`cam-${tr.participant.identity}`} trackRef={tr} />
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* controls */}
             <div className="meeting-controls">
                 <ControlBar
                     variation="minimal"
-                    controls={{ microphone: true, camera: true, screenShare: true, chat: false, settings: false, leave: true }}
+                    controls={{ microphone: true, camera: true, screenShare: true, chat: false, settings: false, leave: false }}
                 />
                 <button type="button" onClick={() => setPanelOpen((v) => !v)} className="meeting-control-extra">
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                     Chat & people
+                </button>
+                <button type="button" onClick={() => room.disconnect(true)} className="meeting-leave-btn">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                    </svg>
+                    Leave
                 </button>
             </div>
 

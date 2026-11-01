@@ -77,31 +77,99 @@
     padding: 18px 22px 8px;
 }
 
-.meeting-stage .lk-grid-layout {
+.meeting-grid {
+    display: grid;
     gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    align-content: center;
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.meeting-grid--strip {
+    height: 148px;
+    flex-shrink: 0;
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 210px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    align-content: center;
+    padding-bottom: 4px;
+}
+
+.meeting-screens {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    height: 100%;
+    min-height: 0;
+}
+
+.meeting-screen-main {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.meeting-screen-main .meeting-tile {
+    min-height: 0;
     height: 100%;
 }
 
-.meeting-stage .lk-participant-tile {
+.meeting-tile {
+    position: relative;
     border-radius: 18px;
     overflow: hidden;
     background: #111820;
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.6);
+    min-height: 180px;
 }
 
-.meeting-stage .lk-participant-placeholder {
+.meeting-tile .lk-participant-tile {
+    height: 100%;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #111820;
+    border: none;
+    box-shadow: none;
+}
+
+.meeting-tile .lk-participant-placeholder {
     background: #111820;
 }
 
-.meeting-stage .lk-participant-metadata {
+.meeting-tile .lk-participant-metadata {
     padding: 10px 12px;
 }
 
-.meeting-stage .lk-participant-name {
+.meeting-tile .lk-participant-name {
     font-size: 12px;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.92);
+}
+
+/* mic-muted badge — visible to everyone */
+.meeting-tile-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    background: rgba(225, 29, 72, 0.92);
+    color: #fff;
+    padding: 5px 11px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    box-shadow: 0 6px 18px -6px rgba(225, 29, 72, 0.7);
+    pointer-events: none;
 }
 
 /* controls — compact glass pill, docked bottom-centre */
@@ -179,21 +247,26 @@
     background: #22c55e;
 }
 
-/* leave -> red pill */
-.meeting-controls .lk-leave-button {
-    background: #e11d48;
-    color: #fff;
-    border: none;
-    border-radius: 999px;
-    width: 60px;
-    height: 44px;
+/* leave — always clearly visible */
+.meeting-leave-btn {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 999px;
+    background: #e11d48;
+    color: #fff;
+    padding: 0 24px;
+    height: 46px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    box-shadow: 0 14px 32px -12px rgba(225, 29, 72, 0.8);
     transition: all 0.15s ease;
+    cursor: pointer;
 }
 
-.meeting-controls .lk-leave-button:hover {
+.meeting-leave-btn:hover {
     background: #f43f5e;
     transform: translateY(-1px);
 }
