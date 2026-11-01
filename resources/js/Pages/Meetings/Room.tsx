@@ -295,7 +295,7 @@ function Tile({ trackRef }: any) {
 function MeetingShell({ meeting, identity, displayName, isHost }: any) {
     const tracks = useTracks([
         { source: Track.Source.Camera, withPlaceholder: true },
-        { source: Track.Source.ScreenShare },
+        { source: Track.Source.ScreenShare, withPlaceholder: false },
     ]);
     const cameraTracks = tracks.filter((t: any) => t.source !== Track.Source.ScreenShare);
     const screenTracks = tracks.filter((t: any) => t.source === Track.Source.ScreenShare);
