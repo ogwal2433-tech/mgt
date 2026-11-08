@@ -70,17 +70,16 @@ class AssignmentController extends Controller
         $user = $request->user();
         $dueAt = \Illuminate\Support\Carbon::parse($data['due_at']);
         $dueLabel = $dueAt->format('D d M Y, H:i');
+        $nextId = (int) (Assignment::max('id') ?? 0) + 1;
 
         $assignment = Assignment::create([
+            'reference_number' => 'ASN-' . now()->format('Y') . '-' . str_pad((string) $nextId, 5, '0', STR_PAD_LEFT),
             'title' => $data['title'],
             'body' => $data['body'],
             'require_deliverables' => (bool) $request->input('require_deliverables', false),
             'created_by' => $user->id,
             'due_at' => $dueAt,
             'status' => Assignment::STATUS_SENT,
-        ]);
-        $assignment->update([
-            'reference_number' => 'ASN-' . now()->format('Y') . '-' . str_pad((string) $assignment->id, 5, '0', STR_PAD_LEFT),
         ]);
 
         foreach (array_unique(array_filter($data['recipient_emails'])) as $email) {
