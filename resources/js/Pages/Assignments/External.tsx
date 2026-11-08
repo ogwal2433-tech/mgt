@@ -181,7 +181,13 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
                             </div>
                         </div>
 
-                        <div className="mt-6 whitespace-pre-wrap text-[15px] leading-7 text-ink-700">{assignment.body}</div>
+                        <div className="mt-6 rounded-xl border border-ink-100 bg-ink-50 px-4 py-3 text-sm text-ink-500">
+                            The full assignment brief was sent in your invitation email. Keep a copy using{' '}
+                            <a href={`/assignment/${token}/pdf`} className="font-semibold text-brand-700 underline">
+                                Download PDF
+                            </a>
+                            .
+                        </div>
                     </div>
 
                     {/* what to submit (read-only list) */}
@@ -335,10 +341,14 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
                             <div>
                                 <label className="text-sm font-semibold text-ink-700">
                                     {(assignment.parts ?? []).length > 0 ? 'Additional files' : 'Attach deliverables'}
-                                    {assignment.require_deliverables ? <span className="text-red-500">*</span> : <span className="font-normal text-ink-400"> (optional)</span>}
+                                    <span className="font-normal text-ink-400"> (optional)</span>
                                 </label>
                                 {assignment.can_submit && inputFor(null, 'Upload additional files')}
-                                <p className="mt-1 text-xs text-ink-400">PDF, Word, Excel, PowerPoint, ZIP or images — up to 20 MB each, max 10 files per submission.</p>
+                                <p className="mt-1 text-xs text-ink-400">
+                                    {assignment.require_deliverables
+                                        ? 'At least one file is required overall — upload it under the matching part above or here. PDF, Word, Excel, PowerPoint, ZIP or images — up to 20 MB each, max 10 files per submission.'
+                                        : 'PDF, Word, Excel, PowerPoint, ZIP or images — up to 20 MB each, max 10 files per submission.'}
+                                </p>
                                 {selectedFor(null).length > 0 && (
                                     <ul className="mt-2 space-y-1">
                                         {selectedFor(null).map((x) => (
