@@ -152,6 +152,71 @@
     color: rgba(255, 255, 255, 0.92);
 }
 
+/* speaking — green ring + voice bars, visible to everyone */
+.meeting-tile--speaking {
+    border-color: rgba(16, 185, 129, 0.8);
+    box-shadow:
+        0 0 0 2px rgba(16, 185, 129, 0.65),
+        0 0 28px rgba(16, 185, 129, 0.35),
+        0 18px 40px -18px rgba(0, 0, 0, 0.6);
+}
+
+.meeting-voice {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.92);
+    color: #fff;
+    padding: 5px 11px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    box-shadow: 0 6px 18px -6px rgba(16, 185, 129, 0.7);
+    pointer-events: none;
+}
+
+.meeting-voice-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #fff;
+    animation: meeting-pulse 1.2s ease-in-out infinite;
+}
+
+.meeting-voice-bars {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 12px;
+}
+
+.meeting-voice-bars span {
+    width: 2.5px;
+    border-radius: 2px;
+    background: #fff;
+    animation: meeting-bar 0.9s ease-in-out infinite;
+}
+
+.meeting-voice-bars span:nth-child(1) { height: 5px; animation-delay: 0s; }
+.meeting-voice-bars span:nth-child(2) { height: 11px; animation-delay: 0.15s; }
+.meeting-voice-bars span:nth-child(3) { height: 7px; animation-delay: 0.3s; }
+.meeting-voice-bars span:nth-child(4) { height: 10px; animation-delay: 0.45s; }
+
+@keyframes meeting-bar {
+    0%, 100% { transform: scaleY(0.5); }
+    50% { transform: scaleY(1.25); }
+}
+
+@keyframes meeting-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.55; transform: scale(0.82); }
+}
+
 /* mic-muted badge — visible to everyone */
 .meeting-tile-badge {
     position: absolute;

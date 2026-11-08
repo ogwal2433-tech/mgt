@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountabilityController;
 use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\AuditController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ContractController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ExternalRequisitionController;
+use App\Http\Controllers\ExternalAssignmentController;
 use App\Http\Controllers\GuestMeetingController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\NotificationController;
@@ -49,6 +51,12 @@ Route::prefix('meet')->middleware(['throttle:60,1'])->group(function () {
     Route::get('/{publicId}/room', [GuestMeetingController::class, 'room'])->name('meetings.guest.room');
     Route::get('/{publicId}/chat', [GuestMeetingController::class, 'chatHistory'])->name('meetings.guest.chat-history');
     Route::post('/{publicId}/chat', [GuestMeetingController::class, 'chat'])->middleware('throttle:60,1')->name('meetings.guest.chat');
+});
+
+// Public assignment delivery + deliverable upload (tokenized, no account).
+Route::prefix('assignment')->middleware(['throttle:60,1'])->group(function () {
+    Route::get('/{token}', [ExternalAssignmentController::class, 'show'])->name('assignment.external');
+    Route::post('/{token}', [ExternalAssignmentController::class, 'submit'])->middleware('throttle:20,1')->name('assignment.external.submit');
 });
 
 Route::middleware(['auth', 'active'])->group(function () {
@@ -225,6 +233,15 @@ Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('
     Route::delete('/meetings/{meeting}/participants/{identity}', [MeetingController::class, 'removeParticipant'])->name('meetings.participants.remove');
     Route::get('/meetings/{meeting}/chat', [MeetingController::class, 'chatIndex'])->name('meetings.chat.index');
     Route::post('/meetings/{meeting}/chat', [MeetingController::class, 'chatStore'])->name('meetings.chat.store');
+
+    // Assignments (send tasks externally, collect deliverables)
+    Route::get('/assignments', [AssignmentController::class, 'index'])->middleware('permission:assignments.view,assignments.create,assignments.manage')->name('assignments.index');
+    Route::post('/assignments', [AssignmentController::class, 'store'])->middleware('permission:assignments.create')->name('assignments.store');
+    Route::get('/assignments/{assignment}', [AssignmentController::class, 'show'])->middleware('permission:assignments.view,assignments.create,assignments.manage')->name('assignments.show');
+    Route::post('/assignments/{assignment}/close', [AssignmentController::class, 'close'])->name('assignments.close');
+    Route::get('/assignments/{assignment}/deliverables/{deliverable}/view', [AssignmentController::class, 'view'])->name('assignments.deliverables.view');
+    Route::get('/assignments/{assignment}/deliverables/{deliverable}/download', [AssignmentController::class, 'download'])->name('assignments.deliverables.download');
+    Route::get('/assignments/{assignment}/signatures/{recipient}', [AssignmentController::class, 'signature'])->name('assignments.signature');
 });
 
 require __DIR__.'/auth.php';

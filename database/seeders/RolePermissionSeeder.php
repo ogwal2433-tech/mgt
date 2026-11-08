@@ -29,6 +29,7 @@ class RolePermissionSeeder extends Seeder
                     P::REPORTS_EXECUTIVE, P::REPORTS_FINANCIAL, P::REPORTS_HR, P::REPORTS_TECHNICAL,
                     P::DOCS_SUBMIT,
                     P::MEETINGS_CREATE, P::MEETINGS_VIEW, P::MEETINGS_MANAGE,
+                    P::ASSIGNMENTS_CREATE, P::ASSIGNMENTS_VIEW, P::ASSIGNMENTS_MANAGE,
                     P::AUDIT_VIEW, P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
                 ],
             ],
@@ -47,6 +48,7 @@ class RolePermissionSeeder extends Seeder
                     P::REPORTS_EXECUTIVE, P::REPORTS_FINANCIAL, P::REPORTS_HR,
                     P::DOCS_SUBMIT, P::DOCS_REVIEW,
                     P::MEETINGS_CREATE, P::MEETINGS_VIEW,
+                    P::ASSIGNMENTS_CREATE, P::ASSIGNMENTS_VIEW,
                     P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
                 ],
             ],
@@ -59,6 +61,7 @@ class RolePermissionSeeder extends Seeder
                     P::INVOICES_VIEW, P::INVOICES_PAYMENTS,
         P::DOCS_SUBMIT, P::DOCS_REVIEW,
         P::MEETINGS_CREATE, P::MEETINGS_VIEW,
+        P::ASSIGNMENTS_CREATE, P::ASSIGNMENTS_VIEW,
         P::REPORTS_FINANCIAL, P::DOCUMENTS_DOWNLOAD_CONFIDENTIAL,
                 ],
             ],
@@ -72,6 +75,7 @@ class RolePermissionSeeder extends Seeder
                     P::REPORTS_TECHNICAL,
                     P::DOCS_SUBMIT,
                     P::MEETINGS_CREATE, P::MEETINGS_VIEW,
+                    P::ASSIGNMENTS_CREATE, P::ASSIGNMENTS_VIEW,
                 ],
             ],
             'technical_staff' => [
@@ -81,6 +85,7 @@ class RolePermissionSeeder extends Seeder
                     P::REQUISITIONS_CREATE,
                     P::DOCS_SUBMIT,
                     P::MEETINGS_CREATE, P::MEETINGS_VIEW,
+                    P::ASSIGNMENTS_CREATE, P::ASSIGNMENTS_VIEW,
                 ],
             ],
             'system_admin' => [
@@ -90,6 +95,7 @@ class RolePermissionSeeder extends Seeder
         P::AUDIT_VIEW, P::SYSTEM_SETTINGS, P::SYSTEM_USERS, P::SYSTEM_ROLES,
         P::DOCS_SUBMIT, P::DOCS_REVIEW,
         P::MEETINGS_CREATE, P::MEETINGS_VIEW, P::MEETINGS_MANAGE,
+        P::ASSIGNMENTS_CREATE, P::ASSIGNMENTS_VIEW, P::ASSIGNMENTS_MANAGE,
                 ],
             ],
         ];

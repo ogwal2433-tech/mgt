@@ -1,10 +1,10 @@
 import {
     ControlBar,
-    GridLayout,
     LiveKitRoom,
     ParticipantTile,
     RoomAudioRenderer,
     useConnectionState,
+    useIsSpeaking,
     useParticipants,
     useRoomContext,
     useTracks,
@@ -35,6 +35,63 @@ function Avatar({ name, size = 'h-9 w-9', className = '' }: any) {
         <span className={`flex ${size} items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-emerald-500 text-xs font-bold text-white ${className}`}>
             {name.split(' ').map((p: string) => p[0]).slice(0, 2).join('')}
         </span>
+    );
+}
+
+function PersonRow({ p, identity, isHost, onRemove }: any) {
+    const name = p.name || p.identity || 'Guest';
+    const isSpeaking = useIsSpeaking(p);
+    let micOff = true;
+    try {
+        const pub = p.getTrackPublication?.(Track.Source.Microphone);
+        micOff = !pub || pub.isMuted;
+    } catch {
+        /* participant may have left */
+    }
+
+    return (
+        <div
+            className={`flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition hover:bg-white/5 ${
+                isSpeaking && !micOff ? 'bg-emerald-400/10 ring-1 ring-emerald-400/60' : ''
+            }`}
+        >
+            <Avatar name={name} size="h-8 w-8" className="text-[10px]" />
+            <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold text-white/90">
+                    {name}
+                    {p.identity === identity && <span className="ml-1 text-[10px] font-medium text-white/40">(you)</span>}
+                </p>
+                <p className="flex items-center gap-1.5 text-[10px] text-white/50">
+                    {micOff ? (
+                        <>
+                            <svg className="h-3 w-3 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l4 4m0-4l-4 4" />
+                            </svg>
+                            Muted
+                        </>
+                    ) : isSpeaking ? (
+                        <>
+                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                            Speaking now
+                        </>
+                    ) : (
+                        <>
+                            <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
+                            Listening
+                        </>
+                    )}
+                </p>
+            </div>
+            {isHost && p.identity !== identity && (
+                <button
+                    type="button"
+                    onClick={() => onRemove(p)}
+                    className="rounded-lg px-2 py-1 text-[10px] font-bold text-red-300 transition hover:bg-red-500/20"
+                >
+                    Remove
+                </button>
+            )}
+        </div>
     );
 }
 
@@ -219,40 +276,9 @@ function SidePanel({ room, meeting, identity, displayName, isHost, onClose }: an
                 </>
             ) : (
                 <div className="flex-1 space-y-1.5 overflow-y-auto px-3 py-3">
-                    {participants.map((p: any) => {
-                        const name = p.name || p.identity || 'Guest';
-                        const muted = p.getTrackPublication?.(Track.Source.Microphone)?.isMuted ?? false;
-                        return (
-                            <div key={p.sid} className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition hover:bg-white/5">
-                                <Avatar name={name} size="h-8 w-8" className="text-[10px]" />
-                                <div className="min-w-0 flex-1">
-                                    <p className="truncate text-xs font-semibold text-white/90">
-                                        {name}
-                                        {p.identity === identity && <span className="ml-1 text-[10px] font-medium text-white/40">(you)</span>}
-                                    </p>
-                                    <p className="flex items-center gap-1 text-[10px] text-white/40">
-                                        <svg className={`h-3 w-3 ${muted ? 'text-red-400' : 'text-emerald-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            {muted ? (
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-                                            ) : (
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                                            )}
-                                        </svg>
-                                        {muted ? 'Muted' : 'Speaking'}
-                                    </p>
-                                </div>
-                                {isHost && p.identity !== identity && (
-                                    <button
-                                        type="button"
-                                        onClick={() => removeParticipant(p)}
-                                        className="rounded-lg px-2 py-1 text-[10px] font-bold text-red-300 transition hover:bg-red-500/20"
-                                    >
-                                        Remove
-                                    </button>
-                                )}
-                            </div>
-                        );
-                    })}
+                    {participants.map((p: any) => (
+                        <PersonRow key={p.sid} p={p} identity={identity} isHost={isHost} onRemove={removeParticipant} />
+                    ))}
                 </div>
             )}
         </aside>
@@ -265,6 +291,7 @@ function SidePanel({ room, meeting, identity, displayName, isHost, onClose }: an
 
 function Tile({ trackRef }: any) {
     const participant = trackRef.participant;
+    const isSpeaking = useIsSpeaking(participant);
     let micOff = true;
     try {
         const pub = participant.getTrackPublication?.(Track.Source.Microphone);
@@ -274,7 +301,7 @@ function Tile({ trackRef }: any) {
     }
 
     return (
-        <div className="meeting-tile">
+        <div className={`meeting-tile${isSpeaking && !micOff ? ' meeting-tile--speaking' : ''}`}>
             <ParticipantTile trackRef={trackRef} />
             {micOff && (
                 <div className="meeting-tile-badge">
@@ -282,6 +309,15 @@ function Tile({ trackRef }: any) {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l4 4m0-4l-4 4" />
                     </svg>
                     Muted
+                </div>
+            )}
+            {isSpeaking && !micOff && (
+                <div className="meeting-voice">
+                    <span className="meeting-voice-dot" />
+                    <span className="meeting-voice-bars">
+                        <span /><span /><span /><span />
+                    </span>
+                    Speaking
                 </div>
             )}
         </div>

@@ -153,6 +153,15 @@ class HandleInertiaRequests extends \Inertia\Middleware
             ->where('link_expires_at', '>', now())
             ->count();
 
+        $assignmentCount = \App\Models\Assignment::query()
+            ->where(function ($q) use ($user) {
+                $q->where('created_by', $user->id)
+                    ->orWhereHas('recipients', fn ($r) => $r->where('user_id', $user->id));
+            })
+            ->where('status', \App\Models\Assignment::STATUS_SENT)
+            ->where('due_at', '>', now())
+            ->count();
+
         $items = [
             ['label' => 'Dashboard', 'href' => '/dashboard', 'icon' => 'dashboard', 'show' => true],
             ['label' => 'Employees', 'href' => '/employees', 'icon' => 'users', 'show' => $any([P::EMPLOYEES_VIEW, P::EMPLOYEES_MANAGE])],
@@ -169,6 +178,7 @@ class HandleInertiaRequests extends \Inertia\Middleware
             ['label' => 'My Payslips', 'href' => '/my-payslips', 'icon' => 'receipt', 'show' => true],
                 ['label' => 'Document Submissions', 'href' => '/documents-submissions', 'icon' => 'file-text', 'show' => $any([P::DOCS_SUBMIT, P::DOCS_REVIEW])],
                 ['label' => 'Meetings', 'href' => '/meetings', 'icon' => 'video', 'show' => $any([P::MEETINGS_VIEW, P::MEETINGS_CREATE, P::MEETINGS_MANAGE]), 'badge' => $meetingCount],
+                ['label' => 'Assignments', 'href' => '/assignments', 'icon' => 'clipboard-check', 'show' => $any([P::ASSIGNMENTS_VIEW, P::ASSIGNMENTS_CREATE, P::ASSIGNMENTS_MANAGE]), 'badge' => $assignmentCount],
             ['label' => 'Disbursements', 'href' => '/disbursements', 'icon' => 'cash', 'show' => $any([P::FINANCE_DISBURSE, P::FINANCE_VIEW]), 'badge' => $disbursementCount],
             ['label' => 'Payment Receipts', 'href' => '/receipts', 'icon' => 'receipt', 'show' => $any([P::FINANCE_VIEW, P::FINANCE_DISBURSE, P::REQUISITIONS_CREATE])],
             ['label' => 'Accountability', 'href' => '/accountability', 'icon' => 'clipboard-check', 'show' => $any([P::FINANCE_ACCOUNTABILITY_REVIEW, P::REQUISITIONS_CREATE, P::FINANCE_VIEW])],

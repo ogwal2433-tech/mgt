@@ -79,6 +79,11 @@ final class Permissions
     public const MEETINGS_VIEW = 'meetings.view';
     public const MEETINGS_MANAGE = 'meetings.manage';
 
+    // Assignments (external tasks with deliverables)
+    public const ASSIGNMENTS_CREATE = 'assignments.create';
+    public const ASSIGNMENTS_VIEW = 'assignments.view';
+    public const ASSIGNMENTS_MANAGE = 'assignments.manage';
+
     // Platform
     public const AUDIT_VIEW = 'audit.view';
     public const SYSTEM_SETTINGS = 'system.settings';
@@ -148,6 +153,10 @@ final class Permissions
             self::MEETINGS_CREATE => ['Create meetings', 'Create and host video conference meetings'],
             self::MEETINGS_VIEW => ['View meetings', 'See meetings and join invited ones'],
             self::MEETINGS_MANAGE => ['Manage all meetings', 'Moderate or end any meeting company-wide'],
+
+            self::ASSIGNMENTS_CREATE => ['Create assignments', 'Send assignments and tasks to internal and external recipients'],
+            self::ASSIGNMENTS_VIEW => ['View assignments', 'See assignments and their deliverables'],
+            self::ASSIGNMENTS_MANAGE => ['Manage all assignments', 'View, edit and close any assignment company-wide'],
 
             self::AUDIT_VIEW => ['Audit logs', 'Read the audit trail'],
             self::SYSTEM_SETTINGS => ['System settings', 'Application configuration'],
