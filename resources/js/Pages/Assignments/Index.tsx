@@ -14,6 +14,7 @@ export default function AssignmentsIndex({ assignments, filters }: any) {
     const [staffSearch, setStaffSearch] = useState('');
     const [toEmails, setToEmails] = useState<string[]>([]);
     const [toInput, setToInput] = useState('');
+    const [parts, setParts] = useState<string[]>([]);
 
     const form = useForm({
         title: '',
@@ -22,6 +23,7 @@ export default function AssignmentsIndex({ assignments, filters }: any) {
         require_deliverables: false,
         recipient_emails: [] as string[],
         cc_user_ids: [] as number[],
+        parts: [] as string[],
     });
 
     const applySearch = (value: string) => {
@@ -49,6 +51,7 @@ export default function AssignmentsIndex({ assignments, filters }: any) {
                 setShowCreate(false);
                 form.reset();
                 setToEmails([]);
+                setParts([]);
             },
         });
     };
@@ -161,6 +164,54 @@ export default function AssignmentsIndex({ assignments, filters }: any) {
                                 </span>
                             </label>
                         </div>
+                    </div>
+
+                    <div>
+                        <p className="mb-1.5 text-xs font-semibold text-ink-700">
+                            What they should submit (named parts) <span className="font-normal text-ink-400">(optional)</span>
+                        </p>
+                        <p className="mb-2 text-[11px] text-ink-500">
+                            Name each deliverable part (e.g. “ERD Diagram”, “Data Dictionary”). Recipients upload files per part and can update each part separately.
+                        </p>
+                        <div className="space-y-2">
+                            {parts.map((p, i) => (
+                                <div key={i} className="flex items-center gap-2">
+                                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[11px] font-bold text-brand-700">{i + 1}</span>
+                                    <TextInput
+                                        value={p}
+                                        onChange={(e: any) => {
+                                            const next = [...parts];
+                                            next[i] = e.target.value;
+                                            setParts(next);
+                                            form.setData('parts', next);
+                                        }}
+                                        placeholder={`Part ${i + 1} name`}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const next = parts.filter((_, x) => x !== i);
+                                            setParts(next);
+                                            form.setData('parts', next);
+                                        }}
+                                        className="shrink-0 rounded-lg px-2 py-2 text-sm font-bold text-red-500 hover:bg-red-50"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const next = [...parts, ''];
+                                setParts(next);
+                                form.setData('parts', next);
+                            }}
+                            className="mt-2 rounded-lg border border-dashed border-gray-300 px-3 py-2 text-xs font-semibold text-ink-600 transition hover:border-brand-400 hover:text-brand-700"
+                        >
+                            + Add part
+                        </button>
                     </div>
 
                     <div>

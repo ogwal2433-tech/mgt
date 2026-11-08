@@ -65,6 +65,8 @@ class AssignmentController extends Controller
             'recipient_emails.*' => ['email:rfc', 'max:190'],
             'cc_user_ids' => ['array', 'max:100'],
             'cc_user_ids.*' => ['integer', 'exists:users,id'],
+            'parts' => ['array', 'max:20'],
+            'parts.*' => ['string', 'max:255'],
         ]);
 
         $user = $request->user();
@@ -81,6 +83,10 @@ class AssignmentController extends Controller
             'due_at' => $dueAt,
             'status' => Assignment::STATUS_SENT,
         ]);
+
+        foreach (array_values(array_filter(array_map('trim', $data['parts'] ?? []))) as $i => $partTitle) {
+            $assignment->parts()->create(['title' => $partTitle, 'sort_order' => $i]);
+        }
 
         foreach (array_unique(array_filter($data['recipient_emails'])) as $email) {
             $recipient = AssignmentRecipient::create([
@@ -165,7 +171,7 @@ class AssignmentController extends Controller
     {
         $this->authorizeView($request, $assignment);
 
-        $assignment->load(['creator:id,name', 'recipients' => fn ($q) => $q->orderBy('kind')->orderBy('id'), 'recipients.deliverables']);
+        $assignment->load(['creator:id,name', 'parts', 'recipients' => fn ($q) => $q->orderBy('kind')->orderBy('id'), 'recipients.deliverables.part']);
 
         return Inertia::render('Assignments/Show', [
             'assignment' => $this->present($assignment, true),
@@ -203,6 +209,21 @@ class AssignmentController extends Controller
         return response()->file(Storage::disk('local')->path($deliverable->path), [
             'Content-Type' => $deliverable->mime_type ?: 'application/octet-stream',
         ]);
+    }
+
+    /** Download the assignment brief as a clean PDF. */
+    public function pdf(Request $request, Assignment $assignment)
+    {
+        $this->authorizeView($request, $assignment);
+
+        $assignment->load('creator:id,name', 'parts');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.assignment-brief', [
+            'company' => \App\Support\Settings::company(),
+            'assignment' => $assignment,
+        ]);
+
+        return $pdf->download(($assignment->reference_number ?: 'assignment') . '.pdf');
     }
 
     /** Stream a recipient's signature image inline. */
@@ -268,6 +289,10 @@ class AssignmentController extends Controller
 
         return array_merge($base, [
             'body' => $assignment->body,
+            'parts' => $assignment->parts->map(fn ($p) => [
+                'id' => $p->id,
+                'title' => $p->title,
+            ])->values(),
             'recipients' => $assignment->recipients->map(fn (AssignmentRecipient $r) => [
                 'id' => $r->id,
                 'kind' => $r->kind,
@@ -285,6 +310,8 @@ class AssignmentController extends Controller
                     'filename' => $d->original_filename,
                     'size' => $d->size,
                     'note' => $d->note,
+                    'part_id' => $d->assignment_part_id,
+                    'part_title' => $d->part?->title,
                     'uploaded_at' => $d->uploaded_at?->toIso8601String(),
                 ])->values(),
             ])->values(),

@@ -54,6 +54,8 @@ class ExternalAssignmentController extends Controller
                 ? ['required', 'array', 'min:1', 'max:10']
                 : ['nullable', 'array', 'max:10'],
             'files.*' => ['file', 'max:20480', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,png,jpg,jpeg,txt,md,csv'],
+            'part_ids' => ['nullable', 'array', 'max:10'],
+            'part_ids.*' => ['nullable', 'integer'],
             'note' => ['nullable', 'string', 'max:2000'],
         ];
 
@@ -79,11 +81,16 @@ class ExternalAssignmentController extends Controller
         Storage::disk('local')->put($signaturePath, $binary);
 
         $files = $request->file('files', []);
+        $partIds = $request->input('part_ids', []);
         if ($assignment->require_deliverables && count($files) === 0) {
             return back()->withErrors(['files' => 'This assignment requires deliverable files — please attach at least one document.']);
         }
 
-        foreach ($files as $file) {
+        $validPartIds = $assignment->parts->pluck('id')->all();
+
+        foreach (array_values($files) as $i => $file) {
+            $partId = isset($partIds[$i]) && in_array((int) $partIds[$i], $validPartIds, true) ? (int) $partIds[$i] : null;
+
             $path = $file->storeAs(
                 'assignments/' . $recipient->id,
                 Str::random(24) . '.' . strtolower($file->getClientOriginalExtension() ?: 'bin'),
@@ -92,6 +99,7 @@ class ExternalAssignmentController extends Controller
 
             AssignmentDeliverable::create([
                 'assignment_recipient_id' => $recipient->id,
+                'assignment_part_id' => $partId,
                 'original_filename' => $file->getClientOriginalName(),
                 'path' => $path,
                 'mime_type' => $file->getMimeType(),
@@ -137,6 +145,21 @@ class ExternalAssignmentController extends Controller
         return back()->with('success', 'Your deliverables have been submitted. Thank you.');
     }
 
+    /** Download the assignment brief as a clean PDF (public, tokenized). */
+    public function pdf(string $token)
+    {
+        $recipient = $this->findRecipient($token);
+        $assignment = $recipient->assignment;
+        $assignment->load('creator:id,name', 'parts');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.assignment-brief', [
+            'company' => Settings::company(),
+            'assignment' => $assignment,
+        ]);
+
+        return $pdf->download(($assignment->reference_number ?: 'assignment') . '.pdf');
+    }
+
     /* ------------------------------------------------------------------ */
 
     private function findRecipient(string $token): AssignmentRecipient
@@ -150,6 +173,8 @@ class ExternalAssignmentController extends Controller
 
     private function payload(Assignment $assignment, AssignmentRecipient $recipient): array
     {
+        $deliverables = $recipient->deliverables()->with('part')->orderBy('uploaded_at')->get();
+
         return [
             'title' => $assignment->title,
             'reference_number' => $assignment->reference_number,
@@ -165,10 +190,22 @@ class ExternalAssignmentController extends Controller
             'signed_at' => $recipient->signed_at?->toIso8601String(),
             'has_signature' => (bool) $recipient->signature_path,
             'sender_name' => $assignment->creator?->displayName(),
-            'deliverables' => $recipient->deliverables()->orderBy('uploaded_at')->get()->map(fn ($d) => [
+            'parts' => $assignment->parts->map(fn ($p) => [
+                'id' => $p->id,
+                'title' => $p->title,
+                'files' => $deliverables->where('assignment_part_id', $p->id)->values()->map(fn ($d) => [
+                    'filename' => $d->original_filename,
+                    'size' => $d->size,
+                    'note' => $d->note,
+                    'uploaded_at' => $d->uploaded_at?->toIso8601String(),
+                ]),
+            ])->values(),
+            'deliverables' => $deliverables->map(fn ($d) => [
                 'filename' => $d->original_filename,
                 'size' => $d->size,
                 'note' => $d->note,
+                'part_id' => $d->assignment_part_id,
+                'part_title' => $d->part?->title,
                 'uploaded_at' => $d->uploaded_at?->toIso8601String(),
             ])->values(),
         ];

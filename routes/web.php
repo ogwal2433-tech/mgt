@@ -56,6 +56,7 @@ Route::prefix('meet')->middleware(['throttle:60,1'])->group(function () {
 // Public assignment delivery + deliverable upload (tokenized, no account).
 Route::prefix('assignment')->middleware(['throttle:60,1'])->group(function () {
     Route::get('/{token}', [ExternalAssignmentController::class, 'show'])->name('assignment.external');
+    Route::get('/{token}/pdf', [ExternalAssignmentController::class, 'pdf'])->name('assignment.external.pdf');
     Route::post('/{token}', [ExternalAssignmentController::class, 'submit'])->middleware('throttle:20,1')->name('assignment.external.submit');
 });
 
@@ -242,6 +243,7 @@ Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('
     Route::get('/assignments/{assignment}/deliverables/{deliverable}/view', [AssignmentController::class, 'view'])->name('assignments.deliverables.view');
     Route::get('/assignments/{assignment}/deliverables/{deliverable}/download', [AssignmentController::class, 'download'])->name('assignments.deliverables.download');
     Route::get('/assignments/{assignment}/signatures/{recipient}', [AssignmentController::class, 'signature'])->name('assignments.signature');
+    Route::get('/assignments/{assignment}/pdf', [AssignmentController::class, 'pdf'])->name('assignments.pdf');
 });
 
 require __DIR__.'/auth.php';

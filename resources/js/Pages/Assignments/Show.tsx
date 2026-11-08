@@ -160,37 +160,53 @@ export default function AssignmentShow({ assignment }: any) {
                                         </div>
                                     )}
 
-                                    {/* deliverables */}
+                                    {/* deliverables grouped by part */}
                                     {r.deliverables.length > 0 && (
-                                        <div className="mt-3 space-y-2">
-                                            {r.deliverables.map((d: any) => (
-                                                <div key={d.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-ink-50 px-3 py-2.5">
-                                                    <svg className="h-5 w-5 shrink-0 text-ink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                    </svg>
-                                                    <div className="min-w-0 flex-1">
-                                                        <p className="truncate text-xs font-semibold text-ink-800">{d.filename}</p>
-                                                        <p className="text-[11px] text-ink-400">
-                                                            {formatBytes(d.size)} · {formatDateTime(d.uploaded_at)}
-                                                            {d.note ? ` · ${d.note}` : ''}
-                                                        </p>
+                                        <div className="mt-3 space-y-3">
+                                            {Object.entries(
+                                                r.deliverables.reduce((acc: Record<string, any[]>, d: any) => {
+                                                    const key = d.part_title || 'Other files';
+                                                    (acc[key] = acc[key] || []).push(d);
+                                                    return acc;
+                                                }, {} as Record<string, any[]>),
+                                            ).map(([groupTitle, grouped]) => {
+                                                const items = grouped as any[];
+                                                return (
+                                                <div key={groupTitle}>
+                                                    <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-400">{groupTitle}</p>
+                                                    <div className="mt-1.5 space-y-2">
+                                                        {items.map((d: any) => (
+                                                            <div key={d.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-ink-50 px-3 py-2.5">
+                                                                <svg className="h-5 w-5 shrink-0 text-ink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                </svg>
+                                                                <div className="min-w-0 flex-1">
+                                                                    <p className="truncate text-xs font-semibold text-ink-800">{d.filename}</p>
+                                                                    <p className="text-[11px] text-ink-400">
+                                                                        {formatBytes(d.size)} · {formatDateTime(d.uploaded_at)}
+                                                                        {d.note ? ` · ${d.note}` : ''}
+                                                                    </p>
+                                                                </div>
+                                                                <a
+                                                                    href={`/assignments/${assignment.id}/deliverables/${d.id}/view`}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-ink-700 transition hover:bg-ink-50"
+                                                                >
+                                                                    View
+                                                                </a>
+                                                                <a
+                                                                    href={`/assignments/${assignment.id}/deliverables/${d.id}/download`}
+                                                                    className="rounded-lg bg-brand-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-brand-700"
+                                                                >
+                                                                    Download
+                                                                </a>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                    <a
-                                                        href={`/assignments/${assignment.id}/deliverables/${d.id}/view`}
-                                                        target="_blank"
-                                                        rel="noreferrer"
-                                                        className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-ink-700 transition hover:bg-ink-50"
-                                                    >
-                                                        View
-                                                    </a>
-                                                    <a
-                                                        href={`/assignments/${assignment.id}/deliverables/${d.id}/download`}
-                                                        className="rounded-lg bg-brand-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-brand-700"
-                                                    >
-                                                        Download
-                                                    </a>
                                                 </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
@@ -233,6 +249,15 @@ export default function AssignmentShow({ assignment }: any) {
                             <li>· Digital signature: required on every submission</li>
                             <li>· Deadline: {formatDateTime(assignment.due_at)} — submissions blocked after</li>
                         </ul>
+                        <a
+                            href={`/assignments/${assignment.id}/pdf`}
+                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 px-4 py-2.5 text-xs font-bold text-ink-700 transition hover:bg-ink-50"
+                        >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Download brief PDF
+                        </a>
                     </div>
 
                     {/* danger */}

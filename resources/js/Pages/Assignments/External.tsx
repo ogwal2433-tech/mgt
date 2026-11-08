@@ -30,6 +30,14 @@ function formatBytes(n: number) {
     return `${Math.max(1, Math.round(n / 1024))} KB`;
 }
 
+function FileIcon() {
+    return (
+        <svg className="h-4 w-4 shrink-0 text-ink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+    );
+}
+
 export default function ExternalAssignment({ assignment, company, token }: any) {
     const { errors, flash } = usePage().props as any;
     const { label: countdown, remaining } = useCountdown(assignment.is_past_due ? null : assignment.due_at);
@@ -38,11 +46,19 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
         signature: '' as string | null,
         note: '',
         files: [] as File[],
+        part_ids: [] as (number | null)[],
     });
 
-    const addFiles = (list: FileList | null) => {
+    const addFiles = (list: FileList | null, partId: number | null = null) => {
         if (!list) return;
-        form.setData('files', [...form.data.files, ...Array.from(list)].slice(0, 10));
+        const incoming = Array.from(list).slice(0, 10 - form.data.files.length);
+        form.setData('files', [...form.data.files, ...incoming]);
+        form.setData('part_ids', [...form.data.part_ids, ...incoming.map(() => partId)]);
+    };
+
+    const removeFile = (index: number) => {
+        form.setData('files', form.data.files.filter((_: File, i: number) => i !== index));
+        form.setData('part_ids', form.data.part_ids.filter((_: any, i: number) => i !== index));
     };
 
     const submit = () => {
@@ -52,20 +68,48 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
         });
     };
 
+    const selectedFor = (partId: number | null) =>
+        form.data.files.map((f: File, i: number) => ({ f, i, part: form.data.part_ids[i] ?? null })).filter((x) => x.part === partId);
+
+    const inputFor = (partId: number | null, label: string) => (
+        <label className="mt-2 block cursor-pointer">
+            <span className="sr-only">{label}</span>
+            <input
+                type="file"
+                multiple
+                onChange={(e) => {
+                    addFiles(e.target.files, partId);
+                    e.target.value = '';
+                }}
+                className="block w-full text-sm text-ink-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.png,.jpg,.jpeg,.txt,.md,.csv"
+            />
+        </label>
+    );
+
     return (
         <div className="min-h-screen bg-ink-50">
             <Head title={`${assignment.title} · Assignment`} />
 
             {/* brand bar */}
             <header className="bg-ink-900 text-white">
-                <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-4 sm:px-6">
+                <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-3 px-4 py-4 sm:px-6">
                     <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-emerald-500 text-sm font-extrabold text-white">
                         B
                     </span>
-                    <div>
+                    <div className="min-w-0 flex-1">
                         <p className="text-sm font-extrabold leading-tight">Biiteek Global</p>
                         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-300">Assignments &amp; Tasks</p>
                     </div>
+                    <a
+                        href={`/assignment/${token}/pdf`}
+                        className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-xs font-bold text-white transition hover:bg-white/20"
+                    >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download PDF
+                    </a>
                 </div>
             </header>
 
@@ -80,7 +124,7 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
                             <p className="text-sm font-bold text-emerald-800">Your submission has been received</p>
                             <p className="mt-0.5 text-xs text-emerald-700">
                                 Submitted {new Date(assignment.submitted_at).toLocaleString()}
-                                {assignment.can_submit ? ' — you can still upload additional files until the deadline.' : ''}
+                                {assignment.can_submit ? ' — you can still update specific parts below until the deadline.' : ''}
                             </p>
                         </div>
                     </div>
@@ -139,27 +183,49 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
 
                         <div className="mt-6 whitespace-pre-wrap text-[15px] leading-7 text-ink-700">{assignment.body}</div>
                     </div>
+
+                    {/* what to submit (read-only list) */}
+                    {(assignment.parts ?? []).length > 0 && (
+                        <div className="border-t border-gray-100 px-6 py-5 sm:px-8">
+                            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink-400">What to submit</p>
+                            <ol className="mt-2 space-y-1.5">
+                                {assignment.parts.map((p: any, i: number) => (
+                                    <li key={p.id} className="flex items-start gap-2.5 text-sm text-ink-700">
+                                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[11px] font-bold text-brand-700">
+                                            {i + 1}
+                                        </span>
+                                        {p.title}
+                                    </li>
+                                ))}
+                            </ol>
+                        </div>
+                    )}
                 </div>
 
                 {/* submission form */}
                 {assignment.can_submit && (
                     <div className="mt-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
                         <div className="border-b border-gray-100 px-6 py-5 sm:px-8">
-                            <h2 className="text-lg font-extrabold text-ink-900">{assignment.submitted_at ? 'Upload additional deliverables' : 'Submit your work'}</h2>
+                            <h2 className="text-lg font-extrabold text-ink-900">{assignment.submitted_at ? 'Update your submission' : 'Submit your work'}</h2>
                             <p className="mt-1 text-sm text-ink-500">
                                 {assignment.require_deliverables
-                                    ? 'This assignment requires deliverable files — attach at least one document, then sign and submit.'
-                                    : 'Attach your deliverable files (optional), sign the form and submit.'}
+                                    ? 'This assignment requires deliverable files — attach at least one document, then sign and submit. You can update specific parts at any time before the deadline.'
+                                    : 'Attach your deliverable files (optional), sign the form and submit. You can update specific parts at any time before the deadline.'}
                             </p>
                         </div>
 
-                        <div className="space-y-5 px-6 py-6 sm:px-8">
+                        <div className="space-y-6 px-6 py-6 sm:px-8">
                             {(Object.keys(errors ?? {}).length > 0 || flash?.error) && (
                                 <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                                     {flash?.error && <p className="font-semibold">{flash.error}</p>}
                                     {Object.values(errors ?? {}).map((e: any, i: number) => (
                                         <p key={i}>{e}</p>
                                     ))}
+                                </div>
+                            )}
+                            {flash?.success && (
+                                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+                                    {flash.success}
                                 </div>
                             )}
 
@@ -176,24 +242,72 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
                                 />
                             </div>
 
+                            {/* per-part uploads */}
+                            {(assignment.parts ?? []).map((part: any, i: number) => {
+                                const selected = selectedFor(part.id);
+                                return (
+                                    <div key={part.id} className="rounded-xl border border-gray-200 bg-ink-50/60 p-4">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <p className="text-sm font-bold text-ink-900">
+                                                    Part {i + 1}: {part.title}
+                                                </p>
+                                                {part.files.length > 0 && (
+                                                    <p className="mt-0.5 text-xs font-medium text-emerald-700">
+                                                        {part.files.length} file(s) submitted — upload again to update this part
+                                                    </p>
+                                                )}
+                                            </div>
+                                            {!part.files.length && <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700">Not submitted</span>}
+                                        </div>
+
+                                        {part.files.length > 0 && (
+                                            <ul className="mt-2 space-y-1">
+                                                {part.files.map((f: any, x: number) => (
+                                                    <li key={x} className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs">
+                                                        <FileIcon />
+                                                        <span className="min-w-0 truncate font-medium text-ink-700">{f.filename}</span>
+                                                        <span className="text-ink-400">({formatBytes(f.size)})</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+
+                                        {assignment.can_submit && inputFor(part.id, `Upload file for ${part.title}`)}
+                                        {selected.length > 0 && (
+                                            <ul className="mt-2 space-y-1">
+                                                {selected.map((x) => (
+                                                    <li key={x.i} className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-xs">
+                                                        <span className="min-w-0 truncate font-medium text-brand-700">
+                                                            {x.f.name} <span className="text-ink-400">({formatBytes(x.f.size)})</span>
+                                                        </span>
+                                                        <button type="button" onClick={() => removeFile(x.i)} className="ml-3 font-bold text-red-500 hover:text-red-700">
+                                                            Remove
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                );
+                            })}
+
+                            {/* general files */}
                             <div>
-                                <label className="text-sm font-semibold text-ink-700">Attach deliverables {assignment.require_deliverables ? <span className="text-red-500">*</span> : <span className="font-normal text-ink-400">(optional)</span>}</label>
-                                <input
-                                    type="file"
-                                    multiple
-                                    onChange={(e) => addFiles(e.target.files)}
-                                    className="mt-1.5 block w-full text-sm text-ink-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
-                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.png,.jpg,.jpeg,.txt,.md,.csv"
-                                />
-                                <p className="mt-1 text-xs text-ink-400">PDF, Word, Excel, PowerPoint, ZIP or images — up to 20 MB each, max 10 files.</p>
-                                {form.data.files.length > 0 && (
-                                    <ul className="mt-2 space-y-1.5">
-                                        {form.data.files.map((f: File, i: number) => (
-                                            <li key={i} className="flex items-center justify-between rounded-lg bg-ink-50 px-3 py-2 text-xs">
+                                <label className="text-sm font-semibold text-ink-700">
+                                    {(assignment.parts ?? []).length > 0 ? 'Additional files' : 'Attach deliverables'}
+                                    {assignment.require_deliverables ? <span className="text-red-500">*</span> : <span className="font-normal text-ink-400"> (optional)</span>}
+                                </label>
+                                {assignment.can_submit && inputFor(null, 'Upload additional files')}
+                                <p className="mt-1 text-xs text-ink-400">PDF, Word, Excel, PowerPoint, ZIP or images — up to 20 MB each, max 10 files per submission.</p>
+                                {selectedFor(null).length > 0 && (
+                                    <ul className="mt-2 space-y-1">
+                                        {selectedFor(null).map((x) => (
+                                            <li key={x.i} className="flex items-center justify-between rounded-lg bg-ink-50 px-3 py-2 text-xs">
                                                 <span className="min-w-0 truncate font-medium text-ink-700">
-                                                    {f.name} <span className="text-ink-400">({formatBytes(f.size)})</span>
+                                                    {x.f.name} <span className="text-ink-400">({formatBytes(x.f.size)})</span>
                                                 </span>
-                                                <button type="button" onClick={() => form.setData('files', form.data.files.filter((_: File, x: number) => x !== i))} className="ml-3 font-bold text-red-500 hover:text-red-700">
+                                                <button type="button" onClick={() => removeFile(x.i)} className="ml-3 font-bold text-red-500 hover:text-red-700">
                                                     Remove
                                                 </button>
                                             </li>
@@ -226,14 +340,14 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
                                 disabled={form.processing}
                                 className="w-full rounded-xl bg-brand-600 px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-brand-700 disabled:opacity-60 sm:w-auto sm:px-10"
                             >
-                                {form.processing ? 'Submitting…' : assignment.submitted_at ? 'Submit additional files' : 'Sign & submit'}
+                                {form.processing ? 'Submitting…' : assignment.submitted_at ? 'Update submission' : 'Sign & submit'}
                             </button>
                         </div>
                     </div>
                 )}
 
-                {/* submitted files */}
-                {(assignment.deliverables ?? []).length > 0 && (
+                {/* submitted files (grouped by part) */}
+                {(assignment.deliverables ?? []).length > 0 && !assignment.can_submit && (
                     <div className="mt-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
                         <div className="border-b border-gray-100 px-6 py-5 sm:px-8">
                             <h2 className="text-lg font-extrabold text-ink-900">Your submitted files</h2>
@@ -247,11 +361,12 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
                         <ul className="divide-y divide-gray-100 px-6 sm:px-8">
                             {assignment.deliverables.map((d: any, i: number) => (
                                 <li key={i} className="flex items-center gap-3 py-3">
-                                    <svg className="h-5 w-5 shrink-0 text-ink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
+                                    <FileIcon />
                                     <div className="min-w-0 flex-1">
-                                        <p className="truncate text-sm font-semibold text-ink-800">{d.filename}</p>
+                                        <p className="truncate text-sm font-semibold text-ink-800">
+                                            {d.part_title ? <span className="mr-1.5 rounded bg-brand-50 px-1.5 py-0.5 text-[10px] font-bold text-brand-700">{d.part_title}</span> : null}
+                                            {d.filename}
+                                        </p>
                                         <p className="text-xs text-ink-400">
                                             {formatBytes(d.size)} · uploaded {d.uploaded_at ? new Date(d.uploaded_at).toLocaleString() : ''}
                                         </p>

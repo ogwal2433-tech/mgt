@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AssignmentDeliverable extends Model
 {
     protected $fillable = [
-        'assignment_recipient_id', 'original_filename', 'path',
+        'assignment_recipient_id', 'assignment_part_id', 'original_filename', 'path',
         'mime_type', 'size', 'note', 'uploaded_at',
     ];
 
@@ -23,5 +23,10 @@ class AssignmentDeliverable extends Model
     public function recipient(): BelongsTo
     {
         return $this->belongsTo(AssignmentRecipient::class, 'assignment_recipient_id');
+    }
+
+    public function part(): BelongsTo
+    {
+        return $this->belongsTo(AssignmentPart::class, 'assignment_part_id');
     }
 }
