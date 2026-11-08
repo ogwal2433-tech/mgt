@@ -145,6 +145,17 @@ class ExternalAssignmentController extends Controller
         return back()->with('success', 'Your deliverables have been submitted. Thank you.');
     }
 
+    /** Download a sender-attached document (public, tokenized). */
+    public function attachment(string $token, \App\Models\AssignmentAttachment $attachment)
+    {
+        $recipient = $this->findRecipient($token);
+        abort_unless($attachment->assignment_id === $recipient->assignment_id, 404);
+
+        return Storage::disk('local')->download($attachment->path, $attachment->original_filename, [
+            'Content-Type' => $attachment->mime_type ?: 'application/octet-stream',
+        ]);
+    }
+
     /** Download the assignment brief as a clean PDF (public, tokenized). */
     public function pdf(string $token)
     {
@@ -193,12 +204,19 @@ class ExternalAssignmentController extends Controller
             'parts' => $assignment->parts->map(fn ($p) => [
                 'id' => $p->id,
                 'title' => $p->title,
+                'due_at' => $p->due_at?->toIso8601String(),
+                'due_label' => $p->due_at?->format('D d M Y, H:i'),
                 'files' => $deliverables->where('assignment_part_id', $p->id)->values()->map(fn ($d) => [
                     'filename' => $d->original_filename,
                     'size' => $d->size,
                     'note' => $d->note,
                     'uploaded_at' => $d->uploaded_at?->toIso8601String(),
                 ]),
+            ])->values(),
+            'attachments' => $assignment->attachments->map(fn ($a) => [
+                'filename' => $a->original_filename,
+                'size' => $a->size,
+                'url' => url('/assignment/' . $recipient->token . '/attachments/' . $a->id),
             ])->values(),
             'deliverables' => $deliverables->map(fn ($d) => [
                 'filename' => $d->original_filename,

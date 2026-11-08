@@ -40,6 +40,11 @@ class Assignment extends Model
         return $this->hasMany(AssignmentPart::class)->orderBy('sort_order')->orderBy('id');
     }
 
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(AssignmentAttachment::class);
+    }
+
     public function isPastDue(): bool
     {
         return $this->due_at !== null && $this->due_at->isPast();

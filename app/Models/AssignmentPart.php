@@ -8,11 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AssignmentPart extends Model
 {
-    protected $fillable = ['assignment_id', 'title', 'sort_order'];
+    protected $fillable = ['assignment_id', 'title', 'due_at', 'sort_order'];
 
     protected function casts(): array
     {
-        return ['sort_order' => 'integer'];
+        return [
+            'sort_order' => 'integer',
+            'due_at' => 'datetime',
+        ];
     }
 
     public function assignment(): BelongsTo

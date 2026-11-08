@@ -66,7 +66,10 @@ class AssignmentController extends Controller
             'cc_user_ids' => ['array', 'max:100'],
             'cc_user_ids.*' => ['integer', 'exists:users,id'],
             'parts' => ['array', 'max:20'],
-            'parts.*' => ['string', 'max:255'],
+            'parts.*.title' => ['required', 'string', 'max:255'],
+            'parts.*.due_at' => ['nullable', 'date'],
+            'attachments' => ['nullable', 'array', 'max:5'],
+            'attachments.*' => ['file', 'max:20480', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,png,jpg,jpeg,txt,md,csv'],
         ]);
 
         $user = $request->user();
@@ -84,8 +87,38 @@ class AssignmentController extends Controller
             'status' => Assignment::STATUS_SENT,
         ]);
 
-        foreach (array_values(array_filter(array_map('trim', $data['parts'] ?? []))) as $i => $partTitle) {
-            $assignment->parts()->create(['title' => $partTitle, 'sort_order' => $i]);
+        foreach (array_values($data['parts'] ?? []) as $i => $p) {
+            $title = trim((string) ($p['title'] ?? ''));
+            if ($title === '') {
+                continue;
+            }
+            $assignment->parts()->create([
+                'title' => $title,
+                'due_at' => ! empty($p['due_at']) ? \Illuminate\Support\Carbon::parse($p['due_at']) : null,
+                'sort_order' => $i,
+            ]);
+        }
+
+        // Sender attachments (requirements documents etc.) — stored and emailed with the invite.
+        $attachmentMeta = [];
+        foreach ($request->file('attachments', []) as $file) {
+            $path = $file->storeAs(
+                'assignments/attachments/' . $assignment->id,
+                Str::random(24) . '.' . strtolower($file->getClientOriginalExtension() ?: 'bin'),
+                'local',
+            );
+            $row = $assignment->attachments()->create([
+                'original_filename' => $file->getClientOriginalName(),
+                'path' => $path,
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize() ?: 0,
+                'uploaded_at' => now(),
+            ]);
+            $attachmentMeta[] = [
+                'path' => Storage::disk('local')->path($path),
+                'name' => $file->getClientOriginalName(),
+                'mime' => $row->mime_type,
+            ];
         }
 
         foreach (array_unique(array_filter($data['recipient_emails'])) as $email) {
@@ -107,6 +140,7 @@ class AssignmentController extends Controller
                     '',
                     false,
                     $assignment->reference_number,
+                    $attachmentMeta,
                 ),
                 'Assignment: ' . $assignment->title,
                 'assignment.sent',
@@ -152,6 +186,7 @@ class AssignmentController extends Controller
                     $cc->displayName(),
                     true,
                     $assignment->reference_number,
+                    $attachmentMeta,
                 ),
                 'CC: Assignment: ' . $assignment->title,
                 'assignment.cc',
@@ -171,7 +206,7 @@ class AssignmentController extends Controller
     {
         $this->authorizeView($request, $assignment);
 
-        $assignment->load(['creator:id,name', 'parts', 'recipients' => fn ($q) => $q->orderBy('kind')->orderBy('id'), 'recipients.deliverables.part']);
+        $assignment->load(['creator:id,name', 'parts', 'attachments', 'recipients' => fn ($q) => $q->orderBy('kind')->orderBy('id'), 'recipients.deliverables.part']);
 
         return Inertia::render('Assignments/Show', [
             'assignment' => $this->present($assignment, true),
@@ -208,6 +243,17 @@ class AssignmentController extends Controller
 
         return response()->file(Storage::disk('local')->path($deliverable->path), [
             'Content-Type' => $deliverable->mime_type ?: 'application/octet-stream',
+        ]);
+    }
+
+    /** Download a sender-attached document. */
+    public function downloadAttachment(Request $request, Assignment $assignment, \App\Models\AssignmentAttachment $attachment)
+    {
+        $this->authorizeView($request, $assignment);
+        abort_unless($attachment->assignment_id === $assignment->id, 404);
+
+        return Storage::disk('local')->download($attachment->path, $attachment->original_filename, [
+            'Content-Type' => $attachment->mime_type ?: 'application/octet-stream',
         ]);
     }
 
@@ -292,6 +338,13 @@ class AssignmentController extends Controller
             'parts' => $assignment->parts->map(fn ($p) => [
                 'id' => $p->id,
                 'title' => $p->title,
+                'due_at' => $p->due_at?->toIso8601String(),
+                'due_label' => $p->due_at?->format('D d M Y, H:i'),
+            ])->values(),
+            'attachments' => $assignment->attachments->map(fn ($a) => [
+                'id' => $a->id,
+                'filename' => $a->original_filename,
+                'size' => $a->size,
             ])->values(),
             'recipients' => $assignment->recipients->map(fn (AssignmentRecipient $r) => [
                 'id' => $r->id,

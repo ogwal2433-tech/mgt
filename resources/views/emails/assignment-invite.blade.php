@@ -67,6 +67,25 @@
                         </td>
                     </tr>
 
+                    <!-- Attachments -->
+                    @if(count($attachments ?? []) > 0)
+                    <tr>
+                        <td style="padding: 22px 40px 0;">
+                            <p style="margin: 0 0 10px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color:#8b98a1;">Attached documents</p>
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f8f8; border:1px solid #eef0f1; border-radius:12px;">
+                                @foreach($attachments as $file)
+                                <tr>
+                                    <td style="padding: 11px 18px; border-bottom:1px solid #eef0f1; font-size: 13px; font-weight: 600; color: #232b32;">
+                                        &#128206; {{ $file['name'] ?? $file->original_filename ?? 'Document' }}
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </table>
+                            <p style="margin: 8px 0 0; font-size: 11px; color: #8b98a1;">These documents are also available on your assignment page.</p>
+                        </td>
+                    </tr>
+                    @endif
+
                     <!-- CTA -->
                     <tr>
                         <td style="padding:24px 40px 8px;">

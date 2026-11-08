@@ -194,13 +194,47 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
                                         <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[11px] font-bold text-brand-700">
                                             {i + 1}
                                         </span>
-                                        {p.title}
+                                        <span className="flex flex-wrap items-center gap-2">
+                                            {p.title}
+                                            {p.due_label && (
+                                                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                                                    Due {p.due_label}
+                                                </span>
+                                            )}
+                                        </span>
                                     </li>
                                 ))}
                             </ol>
                         </div>
                     )}
                 </div>
+
+                {/* attached documents */}
+                {(assignment.attachments ?? []).length > 0 && (
+                    <div className="mt-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
+                        <div className="border-b border-gray-100 px-6 py-5 sm:px-8">
+                            <h2 className="text-lg font-extrabold text-ink-900">Attached documents</h2>
+                            <p className="mt-1 text-sm text-ink-500">Reference material for this assignment — same files as attached to your email.</p>
+                        </div>
+                        <ul className="divide-y divide-gray-100 px-6 sm:px-8">
+                            {assignment.attachments.map((a: any, i: number) => (
+                                <li key={i} className="flex items-center gap-3 py-3">
+                                    <FileIcon />
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-semibold text-ink-800">{a.filename}</p>
+                                        <p className="text-xs text-ink-400">{formatBytes(a.size)}</p>
+                                    </div>
+                                    <a
+                                        href={a.url}
+                                        className="rounded-lg bg-brand-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-brand-700"
+                                    >
+                                        Download
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
 
                 {/* submission form */}
                 {assignment.can_submit && (
@@ -251,6 +285,11 @@ export default function ExternalAssignment({ assignment, company, token }: any) 
                                             <div>
                                                 <p className="text-sm font-bold text-ink-900">
                                                     Part {i + 1}: {part.title}
+                                                    {part.due_label && (
+                                                        <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
+                                                            Due {part.due_label}
+                                                        </span>
+                                                    )}
                                                 </p>
                                                 {part.files.length > 0 && (
                                                     <p className="mt-0.5 text-xs font-medium text-emerald-700">

@@ -14,7 +14,8 @@ export default function AssignmentsIndex({ assignments, filters }: any) {
     const [staffSearch, setStaffSearch] = useState('');
     const [toEmails, setToEmails] = useState<string[]>([]);
     const [toInput, setToInput] = useState('');
-    const [parts, setParts] = useState<string[]>([]);
+    const [parts, setParts] = useState<{ title: string; due_at: string }[]>([]);
+    const [attachments, setAttachments] = useState<File[]>([]);
 
     const form = useForm({
         title: '',
@@ -23,7 +24,8 @@ export default function AssignmentsIndex({ assignments, filters }: any) {
         require_deliverables: false,
         recipient_emails: [] as string[],
         cc_user_ids: [] as number[],
-        parts: [] as string[],
+        parts: [] as { title: string; due_at: string }[],
+        attachments: [] as File[],
     });
 
     const applySearch = (value: string) => {
@@ -175,17 +177,27 @@ export default function AssignmentsIndex({ assignments, filters }: any) {
                         </p>
                         <div className="space-y-2">
                             {parts.map((p, i) => (
-                                <div key={i} className="flex items-center gap-2">
+                                <div key={i} className="flex flex-wrap items-center gap-2">
                                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[11px] font-bold text-brand-700">{i + 1}</span>
                                     <TextInput
-                                        value={p}
+                                        value={p.title}
                                         onChange={(e: any) => {
                                             const next = [...parts];
-                                            next[i] = e.target.value;
+                                            next[i] = { ...next[i], title: e.target.value };
                                             setParts(next);
                                             form.setData('parts', next);
                                         }}
                                         placeholder={`Part ${i + 1} name`}
+                                    />
+                                    <TextInput
+                                        type="datetime-local"
+                                        value={p.due_at}
+                                        onChange={(e: any) => {
+                                            const next = [...parts];
+                                            next[i] = { ...next[i], due_at: e.target.value };
+                                            setParts(next);
+                                            form.setData('parts', next);
+                                        }}
                                     />
                                     <button
                                         type="button"
@@ -204,7 +216,7 @@ export default function AssignmentsIndex({ assignments, filters }: any) {
                         <button
                             type="button"
                             onClick={() => {
-                                const next = [...parts, ''];
+                                const next = [...parts, { title: '', due_at: '' }];
                                 setParts(next);
                                 form.setData('parts', next);
                             }}
@@ -212,6 +224,44 @@ export default function AssignmentsIndex({ assignments, filters }: any) {
                         >
                             + Add part
                         </button>
+                    </div>
+
+                    <div>
+                        <p className="mb-1.5 text-xs font-semibold text-ink-700">
+                            Attach documents (requirements PDF etc.) <span className="font-normal text-ink-400">(optional)</span>
+                        </p>
+                        <input
+                            type="file"
+                            multiple
+                            onChange={(e: any) => {
+                                const next = [...attachments, ...(Array.from(e.target.files ?? []) as File[])].slice(0, 5);
+                                setAttachments(next);
+                                form.setData('attachments', next);
+                            }}
+                            className="block w-full text-sm text-ink-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand-700 hover:file:bg-brand-100"
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.png,.jpg,.jpeg,.txt,.md,.csv"
+                        />
+                        <p className="mt-1 text-[11px] text-ink-500">Attached to the invitation email and downloadable from the assignment page — up to 5 files, 20 MB each.</p>
+                        {attachments.length > 0 && (
+                            <ul className="mt-2 space-y-1">
+                                {attachments.map((f, i) => (
+                                    <li key={i} className="flex items-center justify-between rounded-lg bg-ink-50 px-3 py-2 text-xs">
+                                        <span className="min-w-0 truncate font-medium text-ink-700">{f.name}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const next = attachments.filter((_, x) => x !== i);
+                                                setAttachments(next);
+                                                form.setData('attachments', next);
+                                            }}
+                                            className="ml-3 font-bold text-red-500 hover:text-red-700"
+                                        >
+                                            Remove
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
 
                     <div>

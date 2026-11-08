@@ -13,6 +13,9 @@ class AssignmentInviteMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+    /** @var array<int, array{path: string, name: string, mime: ?string}> */
+    public array $attachments = [];
+
     public function __construct(
         public string $assignmentTitle,
         public string $body,
@@ -21,7 +24,19 @@ class AssignmentInviteMail extends Mailable implements ShouldQueue
         public string $recipientName = '',
         public bool $isCc = false,
         public ?string $referenceNumber = null,
-    ) {}
+        array $attachments = [],
+    ) {
+        $this->attachments = $attachments;
+
+        foreach ($this->attachments as $file) {
+            if (! empty($file['path']) && is_file($file['path'])) {
+                $this->attach($file['path'], [
+                    'as' => $file['name'],
+                    'mime' => $file['mime'] ?? null,
+                ]);
+            }
+        }
+    }
 
     public function envelope(): Envelope
     {

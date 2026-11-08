@@ -107,6 +107,34 @@ export default function AssignmentShow({ assignment }: any) {
                         <div className="whitespace-pre-wrap px-6 py-5 text-sm leading-7 text-ink-700">{assignment.body}</div>
                     </div>
 
+                    {/* sender attachments */}
+                    {(assignment.attachments ?? []).length > 0 && (
+                        <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
+                            <div className="border-b border-gray-100 px-5 py-4">
+                                <h3 className="text-sm font-bold text-ink-900">Attached documents</h3>
+                            </div>
+                            <ul className="divide-y divide-gray-100 px-5">
+                                {assignment.attachments.map((a: any) => (
+                                    <li key={a.id} className="flex items-center gap-3 py-3">
+                                        <svg className="h-5 w-5 shrink-0 text-ink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="truncate text-xs font-semibold text-ink-800">{a.filename}</p>
+                                            <p className="text-[11px] text-ink-400">{formatBytes(a.size)}</p>
+                                        </div>
+                                        <a
+                                            href={`/assignments/${assignment.id}/attachments/${a.id}`}
+                                            className="rounded-lg bg-brand-600 px-3 py-1.5 text-[11px] font-semibold text-white transition hover:bg-brand-700"
+                                        >
+                                            Download
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
                     {/* recipients TO + deliverables */}
                     <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
                         <div className="border-b border-gray-100 px-5 py-4">
@@ -219,6 +247,30 @@ export default function AssignmentShow({ assignment }: any) {
 
                 {/* side */}
                 <div className="space-y-6">
+                    {/* what to submit */}
+                    {(assignment.parts ?? []).length > 0 && (
+                        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                            <h3 className="text-sm font-bold text-ink-900">What to submit</h3>
+                            <ol className="mt-2 space-y-2">
+                                {assignment.parts.map((p: any, i: number) => (
+                                    <li key={p.id} className="flex items-start gap-2 text-xs text-ink-700">
+                                        <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[9px] font-bold text-brand-700">
+                                            {i + 1}
+                                        </span>
+                                        <span>
+                                            {p.title}
+                                            {p.due_label && (
+                                                <span className="ml-1.5 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                                                    Due {p.due_label}
+                                                </span>
+                                            )}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ol>
+                        </div>
+                    )}
+
                     {/* CC */}
                     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
                         <h3 className="text-sm font-bold text-ink-900">Copied in the system</h3>

@@ -71,9 +71,30 @@
                     <tr>
                         <td style="padding: 10px 16px; border-bottom: 1px solid #e5e7eb; width: 40px; text-align: center; background-color: #f7f8f8; font-size: 12px; font-weight: bold; color: #16a34a;">{{ $i + 1 }}</td>
                         <td style="padding: 10px 16px; border-bottom: 1px solid #e5e7eb; font-size: 12px; color: #232b32;">{{ $part->title }}</td>
+                        <td style="padding: 10px 16px; border-bottom: 1px solid #e5e7eb; width: 180px; font-size: 11px; color: #92400e;">
+                            {{ $part->due_at ? 'Due ' . $part->due_at->format('D d M Y, H:i') : '' }}
+                        </td>
                     </tr>
                     @endforeach
                 </table>
+            </td>
+        </tr>
+        @endif
+
+        @if($assignment->attachments->isNotEmpty())
+        <!-- Attachments -->
+        <tr>
+            <td style="padding: 26px 40px 0;">
+                <p style="margin: 0 0 10px; font-size: 11px; font-weight: bold; color: #8b98a1; text-transform: uppercase; letter-spacing: 1px;">Attached documents</p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e7eb;">
+                    @foreach($assignment->attachments as $file)
+                    <tr>
+                        <td style="padding: 10px 16px; border-bottom: 1px solid #e5e7eb; font-size: 12px; color: #232b32;">{{ $file->original_filename }}</td>
+                        <td style="padding: 10px 16px; border-bottom: 1px solid #e5e7eb; width: 110px; font-size: 11px; color: #8b98a1;">{{ number_format($file->size / 1024, 0) }} KB</td>
+                    </tr>
+                    @endforeach
+                </table>
+                <p style="margin: 8px 0 0; font-size: 10px; color: #8b98a1;">Download the attached documents from your assignment page or your invitation email.</p>
             </td>
         </tr>
         @endif
