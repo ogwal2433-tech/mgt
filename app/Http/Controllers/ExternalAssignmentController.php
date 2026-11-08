@@ -189,7 +189,6 @@ class ExternalAssignmentController extends Controller
         return [
             'title' => $assignment->title,
             'reference_number' => $assignment->reference_number,
-            'body' => $assignment->body,
             'due_at' => $assignment->due_at?->toIso8601String(),
             'due_label' => $assignment->due_at?->format('D d M Y, H:i'),
             'is_past_due' => $assignment->isPastDue(),
