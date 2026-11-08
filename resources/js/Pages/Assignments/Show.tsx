@@ -1,9 +1,18 @@
 import AppLayout from '@/Layouts/AppLayout';
 import Badge from '@/Components/ui/Badge';
 import Button from '@/Components/ui/Button';
+import Modal from '@/Components/ui/Modal';
+import { TextInput } from '@/Components/ui/Form';
 import { formatDateTime } from '@/types/app';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+
+const toLocalInput = (iso: string | null) => {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
 
 function useCountdown(targetIso: string | null, active: boolean) {
     const [remaining, setRemaining] = useState(() =>
@@ -33,7 +42,30 @@ function formatBytes(n: number) {
 export default function AssignmentShow({ assignment }: any) {
     const { flash } = usePage().props as any;
     const [copied, setCopied] = useState<number | null>(null);
+    const [showParts, setShowParts] = useState(false);
+    const [partsDraft, setPartsDraft] = useState<any[]>([]);
+    const partsForm = useForm({ parts: [] as any[] });
+    const recipientForm = useForm({ email: '' });
     const countdown = useCountdown(assignment.due_at, !assignment.is_past_due);
+
+    const openPartsEditor = () => {
+        setPartsDraft(
+            (assignment.parts ?? []).map((p: any) => ({
+                id: p.id,
+                title: p.title,
+                due_at: toLocalInput(p.due_at),
+            })),
+        );
+        setShowParts(true);
+    };
+
+    const saveParts = () => {
+        partsForm.setData('parts', partsDraft);
+        partsForm.patch(`/assignments/${assignment.id}/parts`, {
+            preserveScroll: true,
+            onSuccess: () => setShowParts(false),
+        });
+    };
 
     const copyLink = async (id: number, link: string) => {
         try {
@@ -137,9 +169,42 @@ export default function AssignmentShow({ assignment }: any) {
 
                     {/* recipients TO + deliverables */}
                     <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-                        <div className="border-b border-gray-100 px-5 py-4">
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4">
                             <h3 className="text-sm font-bold text-ink-900">Recipients & submissions</h3>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <input
+                                    type="email"
+                                    value={recipientForm.data.email}
+                                    onChange={(e) => recipientForm.setData('email', e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            recipientForm.post(`/assignments/${assignment.id}/recipients`, {
+                                                preserveScroll: true,
+                                                onSuccess: () => recipientForm.reset(),
+                                            });
+                                        }
+                                    }}
+                                    placeholder="Send to another email…"
+                                    className="rounded-lg border border-gray-200 px-3 py-2 text-xs text-ink-800 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+                                />
+                                <Button
+                                    size="sm"
+                                    onClick={() =>
+                                        recipientForm.post(`/assignments/${assignment.id}/recipients`, {
+                                            preserveScroll: true,
+                                            onSuccess: () => recipientForm.reset(),
+                                        })
+                                    }
+                                    disabled={recipientForm.processing || recipientForm.data.email.trim() === ''}
+                                >
+                                    {recipientForm.processing ? 'Sending…' : 'Send'}
+                                </Button>
+                            </div>
                         </div>
+                        {recipientForm.errors?.email && (
+                            <p className="border-b border-gray-100 px-5 py-2 text-xs font-medium text-red-600">{recipientForm.errors.email}</p>
+                        )}
 
                         <div className="divide-y divide-gray-100">
                             {toList.map((r: any) => (
@@ -248,9 +313,18 @@ export default function AssignmentShow({ assignment }: any) {
                 {/* side */}
                 <div className="space-y-6">
                     {/* what to submit */}
-                    {(assignment.parts ?? []).length > 0 && (
-                        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                        <div className="flex items-center justify-between">
                             <h3 className="text-sm font-bold text-ink-900">What to submit</h3>
+                            <button
+                                type="button"
+                                onClick={openPartsEditor}
+                                className="rounded-lg border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-ink-700 transition hover:bg-ink-50"
+                            >
+                                Edit
+                            </button>
+                        </div>
+                        {(assignment.parts ?? []).length > 0 ? (
                             <ol className="mt-2 space-y-2">
                                 {assignment.parts.map((p: any, i: number) => (
                                     <li key={p.id} className="flex items-start gap-2 text-xs text-ink-700">
@@ -268,8 +342,10 @@ export default function AssignmentShow({ assignment }: any) {
                                     </li>
                                 ))}
                             </ol>
-                        </div>
-                    )}
+                        ) : (
+                            <p className="mt-2 text-xs text-ink-500">No named parts — recipients can upload any deliverables.</p>
+                        )}
+                    </div>
 
                     {/* CC */}
                     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -328,6 +404,70 @@ export default function AssignmentShow({ assignment }: any) {
                     )}
                 </div>
             </div>
+            {/* edit what-to-submit */}
+            <Modal open={showParts} onClose={() => setShowParts(false)} title="Edit what to submit" size="lg">
+                <div className="space-y-3">
+                    <p className="text-xs text-ink-500">
+                        Changes apply immediately — recipients see the updated list on their submission page. Removing a part does not delete files already submitted for it.
+                    </p>
+                    <div className="space-y-2">
+                        {partsDraft.map((p: any, i: number) => (
+                            <div key={i} className="flex flex-wrap items-center gap-2">
+                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-50 text-[11px] font-bold text-brand-700">{i + 1}</span>
+                                <TextInput
+                                    value={p.title}
+                                    onChange={(e: any) => {
+                                        const next = [...partsDraft];
+                                        next[i] = { ...next[i], title: e.target.value };
+                                        setPartsDraft(next);
+                                    }}
+                                    placeholder={`Part ${i + 1} name`}
+                                />
+                                <TextInput
+                                    type="datetime-local"
+                                    value={p.due_at}
+                                    onChange={(e: any) => {
+                                        const next = [...partsDraft];
+                                        next[i] = { ...next[i], due_at: e.target.value };
+                                        setPartsDraft(next);
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setPartsDraft(partsDraft.filter((_, x) => x !== i))}
+                                    className="shrink-0 rounded-lg px-2 py-2 text-sm font-bold text-red-500 hover:bg-red-50"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => setPartsDraft([...partsDraft, { id: null, title: '', due_at: '' }])}
+                        className="rounded-lg border border-dashed border-gray-300 px-3 py-2 text-xs font-semibold text-ink-600 transition hover:border-brand-400 hover:text-brand-700"
+                    >
+                        + Add part
+                    </button>
+
+                    {partsForm.errors && Object.keys(partsForm.errors).length > 0 && (
+                        <div className="rounded-lg bg-red-50 p-3 text-xs text-red-700">
+                            {Object.values(partsForm.errors).map((err: any, i) => (
+                                <p key={i}>{err}</p>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="flex justify-end gap-2 pt-2">
+                        <Button variant="secondary" onClick={() => setShowParts(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={saveParts} disabled={partsForm.processing}>
+                            {partsForm.processing ? 'Saving…' : 'Save changes'}
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </AppLayout>
     );
 }

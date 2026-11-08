@@ -240,6 +240,8 @@ Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware('
     Route::get('/assignments', [AssignmentController::class, 'index'])->middleware('permission:assignments.view,assignments.create,assignments.manage')->name('assignments.index');
     Route::post('/assignments', [AssignmentController::class, 'store'])->middleware('permission:assignments.create')->name('assignments.store');
     Route::get('/assignments/{assignment}', [AssignmentController::class, 'show'])->middleware('permission:assignments.view,assignments.create,assignments.manage')->name('assignments.show');
+    Route::patch('/assignments/{assignment}/parts', [AssignmentController::class, 'updateParts'])->name('assignments.parts.update');
+    Route::post('/assignments/{assignment}/recipients', [AssignmentController::class, 'addRecipient'])->name('assignments.recipients.add');
     Route::post('/assignments/{assignment}/close', [AssignmentController::class, 'close'])->name('assignments.close');
     Route::get('/assignments/{assignment}/deliverables/{deliverable}/view', [AssignmentController::class, 'view'])->name('assignments.deliverables.view');
     Route::get('/assignments/{assignment}/deliverables/{deliverable}/download', [AssignmentController::class, 'download'])->name('assignments.deliverables.download');

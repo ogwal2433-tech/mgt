@@ -257,6 +257,98 @@ class AssignmentController extends Controller
         ]);
     }
 
+    /** Resend / send the assignment to an additional email address. */
+    public function addRecipient(Request $request, Assignment $assignment)
+    {
+        $user = $request->user();
+        abort_unless($assignment->created_by === $user->id || $user->hasPermission(Permissions::ASSIGNMENTS_MANAGE), 403);
+
+        $data = $request->validate([
+            'email' => ['required', 'email:rfc', 'max:190'],
+        ], [
+            'email.required' => 'Please enter an email address.',
+            'email.email' => 'Please enter a valid email address.',
+        ]);
+
+        $email = strtolower(trim($data['email']));
+
+        if ($assignment->recipients()->where('kind', AssignmentRecipient::KIND_TO)->where('email', $email)->exists()) {
+            return back()->withErrors(['email' => 'This email has already received the assignment.']);
+        }
+
+        $recipient = AssignmentRecipient::create([
+            'assignment_id' => $assignment->id,
+            'kind' => AssignmentRecipient::KIND_TO,
+            'email' => $email,
+            'token' => Str::random(48),
+            'sent_at' => now(),
+        ]);
+
+        $attachmentMeta = $assignment->attachments->map(fn ($a) => [
+            'path' => Storage::disk('local')->path($a->path),
+            'name' => $a->original_filename,
+            'mime' => $a->mime_type,
+        ])->all();
+
+        NotificationService::sendEmailTo(
+            $email,
+            new AssignmentInviteMail(
+                $assignment->title,
+                $assignment->body,
+                url('/assignment/' . $recipient->token),
+                $assignment->due_at->format('D d M Y, H:i'),
+                '',
+                false,
+                $assignment->reference_number,
+                $attachmentMeta,
+            ),
+            'Assignment: ' . $assignment->title,
+            'assignment.sent',
+            Assignment::class,
+            $assignment->id,
+        );
+
+        AuditLogger::log('assignment.recipient_added', Assignment::class, $assignment->id, "Sent assignment to {$email}");
+
+        return back()->with('success', 'Assignment sent to ' . $email . '.');
+    }
+
+    /** Edit the "what to submit" parts after the assignment has been sent. */
+    public function updateParts(Request $request, Assignment $assignment)
+    {
+        $user = $request->user();
+        abort_unless($assignment->created_by === $user->id || $user->hasPermission(Permissions::ASSIGNMENTS_MANAGE), 403);
+
+        $data = $request->validate([
+            'parts' => ['array', 'max:20'],
+            'parts.*.id' => ['nullable', 'integer'],
+            'parts.*.title' => ['required', 'string', 'max:255'],
+            'parts.*.due_at' => ['nullable', 'date'],
+        ]);
+
+        $keep = [];
+        foreach (array_values($data['parts'] ?? []) as $i => $p) {
+            $title = trim((string) $p['title']);
+            if ($title === '') {
+                continue;
+            }
+            $due = ! empty($p['due_at']) ? \Illuminate\Support\Carbon::parse($p['due_at']) : null;
+
+            if (! empty($p['id']) && ($part = $assignment->parts()->whereKey($p['id'])->first())) {
+                $part->update(['title' => $title, 'due_at' => $due, 'sort_order' => $i]);
+                $keep[] = $part->id;
+            } else {
+                $keep[] = $assignment->parts()->create(['title' => $title, 'due_at' => $due, 'sort_order' => $i])->id;
+            }
+        }
+
+        $assignment->parts()->whereNotIn('id', $keep)->delete();
+
+        AuditLogger::log('assignment.parts_updated', Assignment::class, $assignment->id, 'Updated what-to-submit parts');
+
+        return back()->with('success', 'What-to-submit list updated.');
+    }
+
     /** Download the assignment brief as a clean PDF. */
     public function pdf(Request $request, Assignment $assignment)
     {
